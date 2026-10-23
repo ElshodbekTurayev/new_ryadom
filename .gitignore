@@ -57,4 +57,5 @@ graphify-out/
 
 # Local dev data: in-memory store snapshot and uploaded images
 .data/
-uploads/
+/uploads/
+apps/backend/uploads/
