@@ -35,7 +35,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
       // Router redirect takes over once auth state has a named user.
     } on AppException catch (e) {
       if (!mounted) return;
-      showAppToast(context, e.message.isNotEmpty ? e.message : ref.t('common.error'), tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e), tone: ToastTone.error);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

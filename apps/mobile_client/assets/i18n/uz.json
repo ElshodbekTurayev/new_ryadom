@@ -45,7 +45,8 @@
     "saveName": "Saqlash va boshlash",
     "invalidPhone": "Telefon raqamini to'liq kiriting",
     "sendCodeFailed": "SMS kod yuborilmadi",
-    "verifyFailed": "Kod noto'g'ri yoki muddati o'tgan"
+    "verifyFailed": "Kod noto'g'ri yoki muddati o'tgan",
+    "sessionLoadFailed": "Profilni yuklab bo'lmadi"
   },
   "location": {
     "title": "Uyingiz qayerda?",
@@ -115,7 +116,7 @@
   "checkout": {
     "title": "Buyurtmani rasmiylashtirish",
     "deliveryAddress": "Yetkazish manzili",
-    "addressHint": "Manzilni bosh sahifada o'zgartirish mumkin",
+    "addressHint": "Kuryer aynan shu manzilga keladi",
     "contactPhone": "Aloqa telefoni",
     "paymentMethod": "To'lov turi",
     "cashOnDelivery": "Naqd (yetkazilganda to'lash)",
@@ -136,7 +137,10 @@
     "orderPlaced": "Buyurtma qabul qilindi!",
     "errorPhone": "Telefon raqamingizni kiriting",
     "promoCode": "Promo-kod",
-    "promoCodePlaceholder": "Masalan: SALOM"
+    "promoCodePlaceholder": "Masalan: SALOM",
+    "invalidPhone": "Telefon raqamini +998 XX XXX XX XX ko'rinishida kiriting",
+    "chooseAddress": "Avval yetkazish manzilini tanlang",
+    "changeAddress": "Manzilni o'zgartirish"
   },
   "address": {
     "entrance": "Podyezd",
@@ -173,7 +177,8 @@
       "on_the_way": "Kuryer yo'lda",
       "delivered": "Buyurtma yetkazildi. Yoqimli ishtaha!",
       "cancelled": "Buyurtma bekor qilindi"
-    }
+    },
+    "quantity": "{{count}} dona"
   },
   "rating": {
     "title": "Buyurtma yetkazildi",
@@ -219,5 +224,34 @@
     "orders": "Buyurtmalar",
     "cart": "Savat",
     "profile": "Profil"
+  },
+  "errors": {
+    "NETWORK_ERROR": "Server bilan aloqa yo'q. Internetni tekshiring.",
+    "TIMEOUT": "Server javob bermadi. Birozdan so'ng qayta urinib ko'ring.",
+    "INVALID_SMS_CODE": "Kod noto'g'ri. Qayta tekshiring.",
+    "SMS_CODE_EXPIRED": "Kodning muddati tugadi. Yangi kod so'rang.",
+    "TOO_MANY_ATTEMPTS": "Urinishlar ko'p bo'ldi. Yangi kod so'rang.",
+    "TOO_MANY_REQUESTS": "So'rovlar juda ko'p. Birozdan so'ng urinib ko'ring.",
+    "RATE_LIMIT_EXCEEDED": "So'rovlar juda ko'p. Birozdan so'ng urinib ko'ring.",
+    "SMS_HOURLY_LIMIT": "Bu raqamga SMS limiti tugadi. Keyinroq urinib ko'ring.",
+    "SMS_DELIVERY_FAILED": "SMS yuborib bo'lmadi. Keyinroq urinib ko'ring.",
+    "INVALID_CREDENTIALS": "Bu raqam do'kon xodimiga tegishli. Do'kon paneli orqali kiring.",
+    "USER_BLOCKED": "Hisobingiz bloklangan. Qo'llab-quvvatlash xizmatiga murojaat qiling.",
+    "CART_EMPTY": "Savatchangiz bo'sh.",
+    "CART_MULTIPLE_SHOPS": "Savatchada faqat bitta do'kon mahsulotlari bo'lishi mumkin.",
+    "SHOP_INACTIVE": "Do'kon hozir buyurtma qabul qilmayapti.",
+    "SHOP_CLOSED": "Do'kon hozir yopiq.",
+    "SHOP_NOT_FOUND": "Do'kon topilmadi.",
+    "OUT_OF_STOCK": "Ba'zi mahsulotlar yetarli emas. Savatchani yangilang.",
+    "ORDER_TOTAL_TOO_LARGE": "Buyurtma summasi juda katta.",
+    "ONLINE_PAYMENTS_DISABLED": "Onlayn to'lov hozircha mavjud emas. Naqd to'lovni tanlang.",
+    "INVALID_PROMO_CODE": "Promo-kod noto'g'ri yoki muddati o'tgan.",
+    "ORDER_NOT_CANCELLABLE": "Bu buyurtmani endi bekor qilib bo'lmaydi.",
+    "INVALID_STATUS_TRANSITION": "Buyurtma holati allaqachon o'zgargan.",
+    "ALREADY_REVIEWED": "Siz bu buyurtmani allaqachon baholagansiz.",
+    "ORDER_NOT_DELIVERED": "Buyurtma hali yetkazilmagan.",
+    "ORDER_NOT_FOUND": "Buyurtma topilmadi.",
+    "DUPLICATE_REQUEST": "So'rov allaqachon qayta ishlanmoqda.",
+    "INTERNAL_SERVER_ERROR": "Serverda xatolik. Birozdan so'ng urinib ko'ring."
   }
 }

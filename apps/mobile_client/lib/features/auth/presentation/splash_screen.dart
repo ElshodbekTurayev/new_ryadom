@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import 'auth_controller.dart';
 import '../../../ui/ui.dart';
 import 'widgets/brand_mark.dart';
 
@@ -12,6 +13,8 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authControllerProvider);
+    final failed = auth.hasError && !auth.isLoading;
     return Scaffold(
       backgroundColor: AppColors.brand,
       body: DecoratedBox(
@@ -39,6 +42,27 @@ class SplashScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: AppText.body.withColor(AppColors.white.withValues(alpha: 0.8)),
                 ).animate(delay: 200.ms).fadeIn(duration: AppDurations.slow).moveY(begin: 8, end: 0, curve: AppCurves.standard),
+                if (failed) ...[
+                  // Profile fetch failed for a non-auth reason (offline, server
+                  // down). The session is kept; let the user try again.
+                  const SizedBox(height: AppSpacing.xxl),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                    child: Text(
+                      '${ref.t('auth.sessionLoadFailed')}. ${ref.errorText(auth.error)}',
+                      textAlign: TextAlign.center,
+                      style: AppText.bodySm.withColor(AppColors.white),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: ref.t('common.retry'),
+                    icon: LucideIcons.refreshCw,
+                    variant: AppButtonVariant.secondary,
+                    expand: false,
+                    onPressed: () => ref.invalidate(authControllerProvider),
+                  ),
+                ],
               ],
             ),
           ),

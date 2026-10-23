@@ -7,11 +7,13 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../auth/presentation/widgets/uz_phone.dart';
 import '../../cart/data/cart_api.dart';
 import '../../cart/presentation/cart_controller.dart';
 import '../../cart/presentation/widgets/cart_action_bar.dart';
 import '../../cart/presentation/widgets/cart_summary_card.dart';
 import '../../location/presentation/address_controller.dart';
+import '../../location/presentation/address_picker_sheet.dart';
 import '../data/orders_api.dart';
 import 'orders_providers.dart';
 import 'widgets/checkout_address_card.dart';
@@ -43,8 +45,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    final user = ref.read(authControllerProvider).value;
-    _phoneController = TextEditingController(text: user?.phone ?? '');
+    final user = ref.read(authControllerProvider).valueOrNull;
+    final phone = user?.phone;
+    _phoneController = TextEditingController(text: phone == null ? '' : formatUzPhone(phone));
   }
 
   @override
@@ -60,12 +63,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    if (_placing) return;
     final address = ref.read(addressControllerProvider);
 
-    if (_phoneController.text.trim().isEmpty) {
-      setState(() => _phoneError = ref.t('checkout.errorPhone'));
+    // Web refresh / stale tab: the cart may be empty by now.
+    if (ref.read(cartControllerProvider).isEmpty) {
+      showAppToast(context, ref.t('errors.CART_EMPTY'), tone: ToastTone.error);
+      context.go('/cart');
       return;
     }
+
+    // Never deliver to the Tashkent-centre placeholder: GPS was not granted
+    // and nothing was picked yet, so ask for the real point first.
+    if (address.isPlaceholder) {
+      showAppToast(context, ref.t('checkout.chooseAddress'));
+      await showAddressPickerSheet(context, ref);
+      return;
+    }
+
+    // The API only accepts +998XXXXXXXXX; accept any spacing / pasted prefix.
+    final rawPhone = _phoneController.text.trim();
+    final digits = uzNationalDigits(rawPhone);
+    if (rawPhone.isEmpty || digits.length != kUzPhoneDigits) {
+      setState(() => _phoneError = ref.t(rawPhone.isEmpty ? 'checkout.errorPhone' : 'checkout.invalidPhone'));
+      return;
+    }
+    final customerPhone = '+998$digits';
 
     setState(() {
       _placing = true;
@@ -80,7 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (_floorController.text.isNotEmpty) parts.add("Qavat: ${_floorController.text}");
       if (_apartmentController.text.isNotEmpty) parts.add("Xonadon: ${_apartmentController.text}");
       if (_doorCodeController.text.isNotEmpty) parts.add("Domofon: ${_doorCodeController.text}");
-      final fullAddress = parts.isEmpty ? address.addressText : '${address.addressText} (${parts.join(', ')})';
+      final fullAddress = _clamp(parts.isEmpty ? address.addressText : '${address.addressText} (${parts.join(', ')})', 300);
 
       var comment = _commentController.text.trim();
       if (_paymentMethod == PaymentMethod.cash) {
@@ -97,9 +120,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             addressText: fullAddress,
             lat: address.lat,
             lng: address.lng,
-            customerPhone: _phoneController.text.trim(),
+            customerPhone: customerPhone,
             paymentMethod: _paymentMethod.value,
-            comment: comment.isEmpty ? null : comment,
+            comment: comment.isEmpty ? null : _clamp(comment, 500),
             promoCode: promo.isNotEmpty ? promo : null,
           ));
 
@@ -110,11 +133,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     } on AppException catch (e) {
       // Covers INVALID_PROMO_CODE and every other backend envelope error.
       if (!mounted) return;
-      showAppToast(context, e.message, tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e), tone: ToastTone.error);
     } finally {
       if (mounted) setState(() => _placing = false);
     }
   }
+
+  /// Backend limits (address_text 300, comment 500 chars).
+  static String _clamp(String text, int max) => text.length <= max ? text : text.substring(0, max);
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +148,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final total = ref.watch(cartControllerProvider.select((c) => c.totalAmount));
 
     return Scaffold(
-      appBar: AppBar(title: Text(ref.t('checkout.title'))),
+      appBar: AppBar(
+        leading: Navigator.canPop(context)
+            ? null
+            : IconButton(icon: const Icon(LucideIcons.arrowLeft), tooltip: ref.t('common.back'), onPressed: () => context.go('/cart')),
+        title: Text(ref.t('checkout.title')),
+      ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -134,6 +165,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 title: ref.t('checkout.deliveryAddress'),
                 child: CheckoutAddressCard(
                   addressText: addressText,
+                  onChangeAddress: () => showAddressPickerSheet(context, ref),
                   entranceController: _entranceController,
                   floorController: _floorController,
                   apartmentController: _apartmentController,
@@ -147,6 +179,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   controller: _phoneController,
                   icon: LucideIcons.phone,
                   keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
                   hint: ref.t('auth.phonePlaceholder'),
                   error: _phoneError,
                   onChanged: _phoneError == null ? null : (_) => setState(() => _phoneError = null),
@@ -170,6 +203,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 child: AppTextField(
                   controller: _commentController,
                   maxLines: 3,
+                  maxLength: 300,
                   hint: ref.t('checkout.commentPlaceholder'),
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -185,7 +219,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         total: total,
         maxWidth: _maxContentWidth,
         loading: _placing,
-        onPressed: _placing ? null : _placeOrder,
+        onPressed: _placing || total <= 0 ? null : _placeOrder,
       ),
     );
   }

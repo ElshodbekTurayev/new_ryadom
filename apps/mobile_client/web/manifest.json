@@ -1,11 +1,11 @@
 {
-    "name": "mobile_client",
-    "short_name": "mobile_client",
+    "name": "Ryadom",
+    "short_name": "Ryadom",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Order from nearby shops with fast delivery.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

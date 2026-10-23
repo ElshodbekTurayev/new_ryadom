@@ -149,7 +149,7 @@ class _CategoryChips extends ConsumerWidget {
       height: _kChipsHeight,
       children: [
         AppChip(label: ref.t('shop.allCategories'), selected: selected == null, onTap: () => notifier.state = null),
-        for (final c in categories) AppChip(label: c.nameUz, selected: selected == c.id, onTap: () => notifier.state = c.id),
+        for (final c in categories) AppChip(label: c.localizedName(ref.watch(localeProvider)), selected: selected == c.id, onTap: () => notifier.state = c.id),
       ],
     );
   }

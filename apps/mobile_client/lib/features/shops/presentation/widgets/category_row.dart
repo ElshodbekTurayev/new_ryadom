@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:localshop_shared/localshop_shared.dart';
 
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
-import '../../domain/product.dart';
 import '../home_controller.dart';
 
 /// Home category strip (design PDF p.4): 72x72 tinted tiles, radius 20.
@@ -57,7 +55,7 @@ class CategoryRow extends ConsumerWidget {
             itemBuilder: (_, i) {
               final c = list[i];
               return _CategoryTile(
-                label: _localizedName(c, lang),
+                label: c.localizedName(lang),
                 icon: categoryIcon(c.nameUz),
                 tint: AppColors.categoryTints[i % AppColors.categoryTints.length],
                 selected: c.id == selected,
@@ -70,11 +68,6 @@ class CategoryRow extends ConsumerWidget {
     );
   }
 
-  static String _localizedName(ProductCategory c, SupportedLanguage lang) => switch (lang) {
-        SupportedLanguage.ru => c.nameRu ?? c.nameUz,
-        SupportedLanguage.en => c.nameEn ?? c.nameUz,
-        _ => c.nameUz,
-      };
 }
 
 /// Best-effort glyph for a category by its Uzbek name.

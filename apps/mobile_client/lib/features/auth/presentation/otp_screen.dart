@@ -69,7 +69,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       });
     } on AppException catch (e) {
       if (!mounted) return;
-      showAppToast(context, e.message.isNotEmpty ? e.message : ref.t('auth.sendCodeFailed'), tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e, fallbackKey: 'auth.sendCodeFailed'), tone: ToastTone.error);
     }
   }
 
@@ -89,7 +89,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       if (!mounted) return;
       _controller.clear();
       setState(() {
-        _error = e.message.isNotEmpty ? e.message : ref.t('auth.verifyFailed');
+        _error = ref.errorText(e, fallbackKey: 'auth.verifyFailed');
         _shakeTick++;
       });
     } finally {

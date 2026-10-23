@@ -17,7 +17,7 @@ import 'main_shell_screen.dart';
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
     ref.listen(authControllerProvider, (previous, next) {
-      if (previous?.isLoading != next.isLoading || previous?.value != next.value) {
+      if (previous?.isLoading != next.isLoading || previous?.valueOrNull != next.valueOrNull || previous?.hasError != next.hasError) {
         notifyListeners();
       }
     });
@@ -35,11 +35,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authControllerProvider);
       final path = state.matchedLocation;
 
-      if (auth.isLoading) {
+      // Loading, or the profile could not be fetched (offline / server down):
+      // stay on the splash, which offers a retry. Tokens are kept.
+      if (auth.isLoading || (auth.hasError && !auth.hasValue)) {
         return path == '/splash' ? null : '/splash';
       }
 
-      final isAuthenticated = auth.value != null;
+      final isAuthenticated = auth.valueOrNull != null;
       final inAuthFlow = path.startsWith('/welcome') || path.startsWith('/auth');
 
       if (!isAuthenticated && !inAuthFlow) return '/welcome';

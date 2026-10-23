@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
 import '../../domain/cart_state.dart';
 import '../cart_controller.dart';
@@ -40,7 +41,7 @@ class CartItemTile extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.nameUz, style: AppText.bodyStrong, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(product.localizedName(ref.watch(localeProvider)), style: AppText.bodyStrong, maxLines: 2, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [

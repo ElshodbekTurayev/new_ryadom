@@ -48,7 +48,15 @@ class AuthInterceptor extends Interceptor {
       return;
     }
 
-    final newAccessToken = await _refreshAccessToken();
+    final String? newAccessToken;
+    try {
+      newAccessToken = await _refreshAccessToken();
+    } on _TransientRefreshFailure {
+      // Offline / server hiccup while refreshing: the refresh token may still
+      // be perfectly valid, so keep the session and just fail this request.
+      handler.next(err);
+      return;
+    }
     if (newAccessToken == null) {
       await tokenStorage.clear();
       onSessionExpired();
@@ -76,7 +84,7 @@ class AuthInterceptor extends Interceptor {
     if (refreshToken == null) return null;
 
     try {
-      final response = await Dio().post(
+      final response = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 15), receiveTimeout: const Duration(seconds: 15))).post(
         '$baseUrl/auth/refresh',
         data: {'refreshToken': refreshToken},
       );
@@ -86,8 +94,19 @@ class AuthInterceptor extends Interceptor {
       await tokenStorage.saveTokens(accessToken: accessToken, refreshToken: newRefreshToken);
       onTokenRefreshed?.call();
       return accessToken;
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      // 400/401/403: the refresh token is missing, expired or revoked.
+      if (status != null && status >= 400 && status < 500 && status != 408 && status != 429) return null;
+      throw const _TransientRefreshFailure();
     } catch (_) {
       return null;
     }
   }
+}
+
+/// The refresh call itself failed for a reason unrelated to the token
+/// (no network, timeout, 5xx, rate limit).
+class _TransientRefreshFailure implements Exception {
+  const _TransientRefreshFailure();
 }

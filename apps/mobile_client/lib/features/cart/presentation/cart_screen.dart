@@ -34,6 +34,10 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        // Opened directly (web refresh / deep link): nothing to pop back to.
+        leading: Navigator.canPop(context)
+            ? null
+            : IconButton(icon: const Icon(LucideIcons.arrowLeft), tooltip: ref.t('common.back'), onPressed: () => context.go('/home')),
         title: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,5 @@
+import 'package:localshop_shared/localshop_shared.dart';
+
 class ProductCategory {
   const ProductCategory({required this.id, required this.nameUz, this.nameRu, this.nameEn});
 
@@ -5,6 +7,9 @@ class ProductCategory {
   final String nameUz;
   final String? nameRu;
   final String? nameEn;
+
+  /// Name in [lang], falling back to uz (then ru/en) when not translated.
+  String localizedName(SupportedLanguage lang) => resolveLocalizedText(uz: nameUz, ru: nameRu, en: nameEn, lang: lang);
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) => ProductCategory(
         id: json['id'] as String,
@@ -49,6 +54,13 @@ class Product {
   final int stock;
   final bool isAvailable;
   final ProductCategory? category;
+
+  /// Name in [lang], falling back to uz (then ru/en) when not translated.
+  String localizedName(SupportedLanguage lang) => resolveLocalizedText(uz: nameUz, ru: nameRu, en: nameEn, lang: lang);
+
+  /// Case-insensitive search over every translation, so a query typed in
+  /// any of the three languages finds the product.
+  bool matchesQuery(String lowerQuery) => [nameUz, nameRu, nameEn].any((n) => n != null && n.toLowerCase().contains(lowerQuery));
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         id: json['id'] as String,

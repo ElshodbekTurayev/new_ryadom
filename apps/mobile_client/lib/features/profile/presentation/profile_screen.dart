@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
     try {
       await ref.read(authControllerProvider.notifier).changeLanguage(lang.value);
     } on AppException catch (e) {
-      if (context.mounted) showAppToast(context, e.message, tone: ToastTone.error);
+      if (context.mounted) showAppToast(context, ref.errorText(e), tone: ToastTone.error);
     } on Exception {
       if (context.mounted) showAppToast(context, ref.t('common.error'), tone: ToastTone.error);
     }
@@ -99,7 +99,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authControllerProvider).value;
+    final user = ref.watch(authControllerProvider).valueOrNull;
     final locale = ref.watch(localeProvider);
     final name = (user?.name ?? '').trim().isEmpty ? ref.t('profile.defaultName') : user!.name!.trim();
 

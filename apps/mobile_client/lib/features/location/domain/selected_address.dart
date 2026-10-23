@@ -21,6 +21,9 @@ class SelectedAddress {
   /// location is detected or chosen.
   static const tashkentDefault = SelectedAddress(lat: 41.2995, lng: 69.2401, addressText: 'Toshkent shahri');
 
+  /// True until a real point is detected or picked (the city-centre default).
+  bool get isPlaceholder => identical(this, tashkentDefault);
+
   SelectedAddress copyWith({
     double? lat,
     double? lng,

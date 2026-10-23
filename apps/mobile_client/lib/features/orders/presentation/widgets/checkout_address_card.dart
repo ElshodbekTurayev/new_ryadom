@@ -14,6 +14,7 @@ class CheckoutAddressCard extends ConsumerWidget {
     required this.floorController,
     required this.apartmentController,
     required this.doorCodeController,
+    this.onChangeAddress,
   });
 
   final String addressText;
@@ -21,6 +22,9 @@ class CheckoutAddressCard extends ConsumerWidget {
   final TextEditingController floorController;
   final TextEditingController apartmentController;
   final TextEditingController doorCodeController;
+
+  /// Opens the address picker; the delivery point can be fixed right here.
+  final VoidCallback? onChangeAddress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,6 +52,15 @@ class CheckoutAddressCard extends ConsumerWidget {
                 ],
               ),
             ),
+            if (onChangeAddress != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              AppIconButton(
+                icon: LucideIcons.pencil,
+                size: 40,
+                onPressed: onChangeAddress,
+                tooltip: ref.t('checkout.changeAddress'),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: AppSpacing.lg),

@@ -23,7 +23,7 @@ final filteredProductsProvider = Provider.autoDispose.family<AsyncValue<List<Pro
   final products = ref.watch(shopProductsProvider(shopId));
 
   return products.whenData((list) => list.where((p) {
-        final matchesQuery = query.isEmpty || p.nameUz.toLowerCase().contains(query);
+        final matchesQuery = query.isEmpty || p.matchesQuery(query);
         final matchesCategory = categoryId == null || p.categoryId == categoryId;
         return matchesQuery && matchesCategory;
       }).toList());

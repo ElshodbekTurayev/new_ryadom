@@ -83,7 +83,7 @@ class _OrdersHistoryScreenState extends ConsumerState<OrdersHistoryScreen> with 
                     error: (err, _) => EmptyState(
                       illustration: AppIllustration.offline,
                       title: ref.t('common.error'),
-                      subtitle: '$err',
+                      subtitle: ref.errorText(err),
                       actionLabel: ref.t('common.retry'),
                       onAction: () => ref.invalidate(myOrdersProvider),
                     ),

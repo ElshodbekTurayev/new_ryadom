@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/errors/app_exception.dart';
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
 
@@ -43,7 +42,6 @@ class _OrderRatingSheetState extends ConsumerState<_OrderRatingSheet> {
     if (_submitting) return;
     setState(() => _submitting = true);
     final thanks = ref.t('rating.thanks');
-    final fallback = ref.t('common.error');
     try {
       await widget.onSubmit(_stars, _comment.text.trim());
       if (!mounted) return;
@@ -51,7 +49,7 @@ class _OrderRatingSheetState extends ConsumerState<_OrderRatingSheet> {
       showAppToast(context, thanks, tone: ToastTone.success);
     } catch (e) {
       if (!mounted) return;
-      showAppToast(context, e is AppException ? e.message : fallback, tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e), tone: ToastTone.error);
       setState(() => _submitting = false);
     }
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
 import '../../../ui/ui.dart';
@@ -59,7 +58,7 @@ class _ShopDetailBody extends ConsumerWidget {
       children: [
         CustomScrollView(
           slivers: [
-            ShopCoverAppBar(shop: shop, onBack: () => context.pop()),
+            ShopCoverAppBar(shop: shop, onBack: context.popOrGoHome),
             SliverToBoxAdapter(
               child: ShopOverlapShift(
                 child: Center(
@@ -371,7 +370,7 @@ class _FloatingBack extends StatelessWidget {
     return Positioned(
       top: top + AppSpacing.sm,
       left: AppSpacing.page,
-      child: AppIconButton(icon: LucideIcons.arrowLeft, bordered: false, shadow: true, onPressed: () => context.pop()),
+      child: AppIconButton(icon: LucideIcons.arrowLeft, bordered: false, shadow: true, onPressed: context.popOrGoHome),
     );
   }
 }

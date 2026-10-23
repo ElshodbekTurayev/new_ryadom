@@ -44,3 +44,16 @@ CustomTransitionPage<T> slidePage<T>({required LocalKey key, required Widget chi
     },
   );
 }
+
+extension SafeBack on BuildContext {
+  /// Pops when there is something to pop; otherwise (web deep link / page
+  /// refresh, where the route is the only one in the stack) goes home instead
+  /// of throwing "There is nothing to pop".
+  void popOrGoHome() {
+    if (canPop()) {
+      pop();
+    } else {
+      go('/home');
+    }
+  }
+}

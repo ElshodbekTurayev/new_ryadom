@@ -56,7 +56,7 @@ class ShopProductListRow extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  product.nameUz,
+                  product.localizedName(ref.watch(localeProvider)),
                   style: soldOut ? AppText.title.tertiary : AppText.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

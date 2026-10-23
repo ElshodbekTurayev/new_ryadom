@@ -26,7 +26,7 @@ class HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final address = ref.watch(addressControllerProvider.select((a) => a.addressText));
-    final user = ref.watch(authControllerProvider).value;
+    final user = ref.watch(authControllerProvider).valueOrNull;
     final userName = user?.name != null && user!.name!.trim().isNotEmpty
         ? user.name!.trim().split(' ').first
         : null;

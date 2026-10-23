@@ -172,7 +172,11 @@ class _ShopListState extends ConsumerState<_ShopList> {
 
     return RefreshIndicator(
       color: AppColors.brand,
-      onRefresh: () async => ref.invalidate(nearbyShopsProvider),
+      onRefresh: () async {
+        ref.invalidate(nearbyShopsProvider);
+        // A failed (offline) category fetch is cached; retry it on refresh.
+        if (ref.read(homeCategoriesProvider).hasError) ref.invalidate(homeCategoriesProvider);
+      },
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         slivers: [
@@ -231,7 +235,10 @@ class _ShopListState extends ConsumerState<_ShopList> {
                 title: ref.t('common.error'),
                 subtitle: ref.t('home.loadFailed'),
                 actionLabel: ref.t('common.retry'),
-                onAction: () => ref.invalidate(nearbyShopsProvider),
+                onAction: () {
+                  ref.invalidate(nearbyShopsProvider);
+                  if (ref.read(homeCategoriesProvider).hasError) ref.invalidate(homeCategoriesProvider);
+                },
               ),
             ),
           ),

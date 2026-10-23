@@ -48,7 +48,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
       context.go('/auth/otp?phone=${Uri.encodeComponent(phone)}');
     } on AppException catch (e) {
       if (!mounted) return;
-      showAppToast(context, e.message.isNotEmpty ? e.message : ref.t('auth.sendCodeFailed'), tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e, fallbackKey: 'auth.sendCodeFailed'), tone: ToastTone.error);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

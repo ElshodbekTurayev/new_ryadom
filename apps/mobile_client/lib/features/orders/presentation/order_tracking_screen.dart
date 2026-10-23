@@ -53,6 +53,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     // RN app): every 5s without a socket, every 20s while one is connected.
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _ticks++;
+      // Delivered / cancelled orders never change again: stop hammering the API.
+      final status = ref.read(orderProvider(widget.orderId)).valueOrNull?.status;
+      if (status != null && isTerminalOrderStatus(status)) return;
       if (ref.read(orderSocketProvider).isConnected && _ticks % 4 != 0) return;
       ref.invalidate(orderProvider(widget.orderId));
     });
@@ -66,13 +69,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     super.dispose();
   }
 
-  void _back() {
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go('/home');
-    }
-  }
+  void _back() => context.popOrGoHome();
 
   Future<void> _cancel() async {
     final confirmed = await showAppConfirm(
@@ -92,7 +89,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       ref.invalidate(orderProvider(widget.orderId));
     } on AppException catch (e) {
       if (!mounted) return;
-      showAppToast(context, e.message, tone: ToastTone.error);
+      showAppToast(context, ref.errorText(e), tone: ToastTone.error);
     } finally {
       if (mounted) setState(() => _cancelling = false);
     }
@@ -121,12 +118,12 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<Order>>(orderProvider(widget.orderId), (previous, next) {
-      final was = previous?.value?.status;
-      final now = next.value?.status;
+      final was = previous?.valueOrNull?.status;
+      final now = next.valueOrNull?.status;
       if (!_celebrate && now == OrderStatus.delivered && was != null && was != OrderStatus.delivered) {
         setState(() => _celebrate = true);
         // Delivered while watching: offer the rating right away (PDF p.13).
-        if (next.value?.review == null) {
+        if (next.valueOrNull?.review == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _rate();
           });
@@ -171,7 +168,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                 error: (err, _) => EmptyState(
                   illustration: AppIllustration.offline,
                   title: ref.t('common.error'),
-                  subtitle: '$err',
+                  subtitle: ref.errorText(err),
                   actionLabel: ref.t('common.retry'),
                   onAction: () => ref.invalidate(orderProvider(widget.orderId)),
                 ),
@@ -538,13 +535,13 @@ class _ItemsList extends ConsumerWidget {
   }
 }
 
-class _ItemRow extends StatelessWidget {
+class _ItemRow extends ConsumerWidget {
   const _ItemRow({required this.item});
 
   final OrderItem item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final icon = _fallbackIcon(item.productName);
 
     return Row(
@@ -577,7 +574,7 @@ class _ItemRow extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '${item.quantity} dona · ',
+                    '${ref.t('order.quantity', {'count': '${item.quantity}'})} · ',
                     style: AppText.caption,
                   ),
                   PriceText(item.unitPrice, style: AppText.micro.copyWith(color: AppColors.textSecondary)),

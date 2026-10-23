@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localshop_shared/localshop_shared.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'errors/app_exception.dart';
 import 'i18n/i18n_service.dart';
 import 'network/api_client.dart';
 import 'push/push_service.dart';
@@ -79,5 +80,21 @@ extension TranslateWidgetRef on WidgetRef {
   String t(String key, [Map<String, String>? params]) {
     final lang = watch(localeProvider);
     return watch(i18nServiceProvider).t(lang, key, params);
+  }
+
+  /// Localized, user-facing text for [error]: the backend error code mapped
+  /// to `errors.<CODE>` (network/timeouts included), otherwise [fallbackKey].
+  /// Raw backend messages are English developer text and are never shown.
+  /// Uses read (not watch) — safe in callbacks as well as in build.
+  String errorText(Object? error, {String fallbackKey = 'common.error'}) {
+    final i18n = read(i18nServiceProvider);
+    final lang = read(localeProvider);
+    final code = error is AppException ? error.code : null;
+    if (code != null) {
+      final key = 'errors.$code';
+      final text = i18n.t(lang, key);
+      if (text != key) return text;
+    }
+    return i18n.t(lang, fallbackKey);
   }
 }

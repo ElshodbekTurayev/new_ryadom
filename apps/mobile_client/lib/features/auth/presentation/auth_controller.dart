@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/providers.dart';
 import '../data/auth_api.dart';
 import '../domain/app_user.dart';
@@ -24,11 +25,33 @@ class AuthController extends AsyncNotifier<AppUser?> {
     try {
       final user = await ref.read(authApiProvider).fetchMe();
       _registerPush();
+      _syncLanguage(user);
       return user;
-    } catch (_) {
-      await ref.read(tokenStorageProvider).clear();
-      return null;
+    } on AppException catch (e) {
+      // Only a rejected session signs the user out. Offline / timeouts / 5xx
+      // keep the tokens and surface as AsyncError, so the splash can offer a
+      // retry instead of silently logging the customer out.
+      if (e.isUnauthorized) {
+        await ref.read(tokenStorageProvider).clear();
+        return null;
+      }
+      rethrow;
     }
+  }
+
+  /// The language picked on this device wins over the profile default (new
+  /// accounts are created as uz): push it so SMS/push texts match the UI.
+  void _syncLanguage(AppUser user) {
+    final local = ref.read(localeProvider);
+    if (user.language == local) return;
+    unawaited(
+      ref.read(authApiProvider).updateProfile(language: local.value).then<void>(
+        (updated) {
+          if (state.valueOrNull?.id == updated.id) state = AsyncData(updated);
+        },
+        onError: (Object _) {},
+      ),
+    );
   }
 
   /// Fire-and-forget: push registration must never delay or fail sign-in.
@@ -45,6 +68,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
     await ref.read(tokenStorageProvider).saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken);
     state = AsyncData(result.user);
     _registerPush();
+    _syncLanguage(result.user);
     return result.isNewUser;
   }
 
@@ -54,7 +78,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
   }
 
   Future<void> changeLanguage(String languageCode) async {
-    final current = state.value;
+    final current = state.valueOrNull;
     if (current == null) return; // guest — language is stored locally only until login
     final updated = await ref.read(authApiProvider).updateProfile(language: languageCode);
     state = AsyncData(updated);

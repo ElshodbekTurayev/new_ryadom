@@ -101,7 +101,7 @@ class ShopProductTile extends ConsumerWidget {
           PriceText(product.price, style: AppText.price, color: soldOut ? AppColors.textTertiary : null),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            product.nameUz,
+            product.localizedName(ref.watch(localeProvider)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: soldOut ? AppText.bodySmStrong.tertiary : AppText.bodySmStrong,

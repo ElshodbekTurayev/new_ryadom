@@ -45,7 +45,8 @@
     "saveName": "Save and Get Started",
     "invalidPhone": "Enter your full phone number",
     "sendCodeFailed": "Failed to send the SMS code",
-    "verifyFailed": "The code is wrong or has expired"
+    "verifyFailed": "The code is wrong or has expired",
+    "sessionLoadFailed": "Could not load your profile"
   },
   "location": {
     "title": "Where is your home?",
@@ -115,7 +116,7 @@
   "checkout": {
     "title": "Checkout",
     "deliveryAddress": "Delivery address",
-    "addressHint": "You can change the address on the home screen",
+    "addressHint": "The courier will come to exactly this address",
     "contactPhone": "Contact phone",
     "paymentMethod": "Payment method",
     "cashOnDelivery": "Cash (pay on delivery)",
@@ -136,7 +137,10 @@
     "orderPlaced": "Order placed!",
     "errorPhone": "Enter your phone number",
     "promoCode": "Promo Code",
-    "promoCodePlaceholder": "e.g. SALOM"
+    "promoCodePlaceholder": "e.g. SALOM",
+    "invalidPhone": "Enter the number as +998 XX XXX XX XX",
+    "chooseAddress": "Choose a delivery address first",
+    "changeAddress": "Change address"
   },
   "address": {
     "entrance": "Entrance",
@@ -173,7 +177,8 @@
       "on_the_way": "The courier is on the way",
       "delivered": "Order delivered. Enjoy!",
       "cancelled": "The order was cancelled"
-    }
+    },
+    "quantity": "{{count}} pcs"
   },
   "rating": {
     "title": "Order delivered",
@@ -219,5 +224,34 @@
     "orders": "Orders",
     "cart": "Cart",
     "profile": "Profile"
+  },
+  "errors": {
+    "NETWORK_ERROR": "No connection to the server. Check your internet.",
+    "TIMEOUT": "The server did not respond. Please try again shortly.",
+    "INVALID_SMS_CODE": "Incorrect code. Please check it.",
+    "SMS_CODE_EXPIRED": "The code has expired. Request a new one.",
+    "TOO_MANY_ATTEMPTS": "Too many attempts. Request a new code.",
+    "TOO_MANY_REQUESTS": "Too many requests. Please try again shortly.",
+    "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again shortly.",
+    "SMS_HOURLY_LIMIT": "SMS limit for this number reached. Try again later.",
+    "SMS_DELIVERY_FAILED": "Could not send the SMS. Try again later.",
+    "INVALID_CREDENTIALS": "This number belongs to a shop staff account. Sign in via the shop panel.",
+    "USER_BLOCKED": "Your account is suspended. Please contact support.",
+    "CART_EMPTY": "Your cart is empty.",
+    "CART_MULTIPLE_SHOPS": "The cart can only hold items from one shop.",
+    "SHOP_INACTIVE": "The shop is not accepting orders right now.",
+    "SHOP_CLOSED": "The shop is closed right now.",
+    "SHOP_NOT_FOUND": "Shop not found.",
+    "OUT_OF_STOCK": "Some items are not available in that quantity. Please update your cart.",
+    "ORDER_TOTAL_TOO_LARGE": "The order total is too large.",
+    "ONLINE_PAYMENTS_DISABLED": "Online payment is not available yet. Please choose cash.",
+    "INVALID_PROMO_CODE": "The promo code is invalid or expired.",
+    "ORDER_NOT_CANCELLABLE": "This order can no longer be cancelled.",
+    "INVALID_STATUS_TRANSITION": "The order status has already changed.",
+    "ALREADY_REVIEWED": "You have already rated this order.",
+    "ORDER_NOT_DELIVERED": "The order has not been delivered yet.",
+    "ORDER_NOT_FOUND": "Order not found.",
+    "DUPLICATE_REQUEST": "This request is already being processed.",
+    "INTERNAL_SERVER_ERROR": "Server error. Please try again shortly."
   }
 }

@@ -14,6 +14,15 @@ const _cartStorageKey = 'ryadom_persisted_cart';
 /// the RN app's "clear cart or stay on your current shop" rule. Persisted locally
 /// to SharedPreferences so the cart survives app restarts and browser refreshes.
 class CartController extends Notifier<CartState> {
+  /// Set by the first local edit; a slower storage read must not overwrite it.
+  bool _touched = false;
+
+  @override
+  set state(CartState value) {
+    _touched = true;
+    super.state = value;
+  }
+
   @override
   CartState build() {
     _loadFromStorage();
@@ -26,7 +35,8 @@ class CartController extends Notifier<CartState> {
       final raw = prefs.getString(_cartStorageKey);
       if (raw != null && raw.isNotEmpty) {
         final decoded = json.decode(raw) as Map<String, dynamic>;
-        state = CartState.fromJson(decoded);
+        final restored = CartState.fromJson(decoded);
+        if (!_touched) super.state = restored;
       }
     } catch (_) {
       // Ignored if corrupt or unavailable
