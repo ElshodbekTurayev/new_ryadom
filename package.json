@@ -1,0 +1,28 @@
+{
+  "name": "local-shop-delivery-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ryadom — monorepo for the NestJS backend API, Next.js web panels (admin, store), and shared TypeScript package (Flutter customer app lives separately in apps/mobile_client)",
+  "author": "Elshodbek Turayev",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev:backend": "pnpm --filter @localshop/backend start:dev",
+    "dev:mock": "node tools/mock-server.js",
+    "dev:admin": "pnpm --filter @localshop/admin dev",
+    "dev:store": "pnpm --filter @localshop/store dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r --if-present test",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "pnpm@12.11.2"
+}

@@ -1,0 +1,172 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Check formatting (advisory only — repo has pre-existing Prettier debt, not gated yet)
+        run: pnpm format:check || true
+
+      - name: Run Unit Tests
+        run: pnpm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: localshop
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/localshop?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: ci-test-access-secret-minimum-32-characters-long
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+          run_install: false
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build shared package
+        run: pnpm --filter @localshop/shared build
+
+      - name: Apply Prisma migrations
+        run: pnpm --filter @localshop/backend exec prisma migrate deploy
+
+      # Guard the hand-written PostGIS expression indexes (0_init) and trigram
+      # indexes (migration 9) that schema.prisma cannot model: a generated
+      # migration that drops them would silently turn /shops/nearby and the admin
+      # searches into full scans. Any other drift is reported but not gated.
+      - name: Check schema drift does not drop hand-written indexes
+        shell: bash
+        working-directory: apps/backend
+        run: |
+          pnpm --filter @localshop/backend exec prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --shadow-database-url "$DATABASE_URL" \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script > drift.sql
+          echo "--- drift between migrations and schema.prisma ---"
+          cat drift.sql
+          if grep -Eiq 'DROP INDEX[^;]*(shops_geo_gist_idx|addresses_geo_gist_idx|_trgm_idx)' drift.sql; then
+            echo "::error::Schema drift would DROP a hand-written GIST/trigram index. Do not accept this diff; see the comments above model Shop/Address/Order/User in schema.prisma."
+            exit 1
+          fi
+
+      - name: Run backend e2e tests
+        run: pnpm --filter @localshop/backend test:e2e
+
+  flutter:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [mobile_client]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: apps/${{ matrix.app }}
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: apps/${{ matrix.app }}
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: apps/${{ matrix.app }}
+        run: flutter test
+
+      - name: Build (web smoke test)
+        working-directory: apps/${{ matrix.app }}
+        run: flutter build web --no-wasm-dry-run
+
+  shared_dart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Test shared Dart package
+        working-directory: packages/shared_dart
+        run: |
+          dart pub get
+          dart analyze
+          dart test
