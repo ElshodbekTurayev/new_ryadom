@@ -127,32 +127,54 @@ class _HomeHeroBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: double.infinity,
-      height: 156,
+      height: 162,
       decoration: BoxDecoration(
-        gradient: AppColors.brandGradient,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF178765), Color(0xFF0F5C45), Color(0xFF0A3E2F)],
+        ),
         borderRadius: BorderRadius.circular(AppRadius.rCard),
-        boxShadow: AppShadows.brand,
+        boxShadow: const [
+          BoxShadow(color: Color(0x380F5C45), blurRadius: 22, offset: Offset(0, 8)),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Soft light bloom top-right so the gradient doesn't look flat.
+          // Soft light bloom top-right
           Positioned(
-            right: -40,
-            top: -60,
+            right: -30,
+            top: -40,
             child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.white.withValues(alpha: 0.08)),
+              width: 190,
+              height: 190,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          // Subtle warm bloom bottom-right
+          Positioned(
+            right: 40,
+            bottom: -50,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accent.withValues(alpha: 0.12),
+              ),
             ),
           ),
           Positioned(
             right: AppSpacing.md,
-            bottom: -8,
-            child: Opacity(opacity: 0.95, child: const Illustration(AppIllustration.success, size: 132)),
+            bottom: -6,
+            child: Opacity(opacity: 0.95, child: const Illustration(AppIllustration.success, size: 136)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, 136, AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, 140, AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -160,19 +182,22 @@ class _HomeHeroBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.18),
+                    color: AppColors.white.withValues(alpha: 0.22),
                     borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: Border.all(color: AppColors.white.withValues(alpha: 0.28), width: 0.8),
+                    border: Border.all(color: AppColors.white.withValues(alpha: 0.32), width: 0.8),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 1)),
+                    ],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(LucideIcons.zap, size: 12, color: AppColors.accent),
+                      const Icon(LucideIcons.zap, size: 12, color: Color(0xFFFFB347)),
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
                           ref.t('home.heroChip'),
-                          style: AppText.micro.copyWith(color: AppColors.white),
+                          style: AppText.micro.copyWith(color: AppColors.white, fontWeight: FontWeight.w700),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -183,14 +208,23 @@ class _HomeHeroBanner extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   ref.t('home.heroTitle'),
-                  style: AppText.sarlavhaM.copyWith(color: AppColors.white, letterSpacing: -0.3),
+                  style: AppText.sarlavhaM.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    height: 1.15,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.xxs),
+                const SizedBox(height: 4),
                 Text(
                   ref.t('home.heroSubtitle'),
-                  style: AppText.caption.copyWith(color: AppColors.white.withValues(alpha: 0.88)),
+                  style: AppText.caption.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.9),
+                    letterSpacing: -0.1,
+                    height: 1.25,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -41,12 +41,22 @@ class ShopProductTile extends ConsumerWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final side = constraints.maxWidth;
-              Widget image = AppImage(
-                url: product.imageUrl,
-                width: side,
-                height: side,
-                radius: BorderRadius.circular(_kImageRadius),
-                fallbackIcon: LucideIcons.shoppingBag,
+              Widget image = Container(
+                decoration: BoxDecoration(
+                  color: AppColors.ink50,
+                  borderRadius: BorderRadius.circular(_kImageRadius),
+                  border: Border.all(color: const Color(0x0C14231C), width: 0.8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(_kImageRadius - 1),
+                  child: AppImage(
+                    url: product.imageUrl,
+                    width: side,
+                    height: side,
+                    radius: BorderRadius.zero,
+                    fallbackIcon: LucideIcons.shoppingBag,
+                  ),
+                ),
               );
               if (soldOut) {
                 image = Opacity(

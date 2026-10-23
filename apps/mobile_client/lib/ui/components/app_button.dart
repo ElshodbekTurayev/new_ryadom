@@ -100,7 +100,7 @@ class AppButton extends StatelessWidget {
 
   (Color, Color, Color?, List<BoxShadow>) _palette() => switch (variant) {
         AppButtonVariant.primary => (AppColors.brand, AppColors.surface, null, AppShadows.brand),
-        AppButtonVariant.secondary => (AppColors.brandSoft, AppColors.brand, null, AppShadows.none),
+        AppButtonVariant.secondary => (AppColors.brandSoft, AppColors.brand, const Color(0x240F5C45), AppShadows.none),
         AppButtonVariant.ghost => (Colors.transparent, AppColors.textPrimary, null, AppShadows.none),
         AppButtonVariant.outline => (AppColors.surface, AppColors.textPrimary, AppColors.border, AppShadows.none),
         AppButtonVariant.danger => (AppColors.dangerSoft, AppColors.danger, null, AppShadows.none),

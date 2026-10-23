@@ -58,7 +58,12 @@ class QuantityStepper extends StatelessWidget {
       decoration: BoxDecoration(
         color: _canAdd ? AppColors.brand : AppColors.border,
         borderRadius: BorderRadius.circular(size / 2),
-        boxShadow: _canAdd && !compact ? AppShadows.brand : null,
+        border: compact ? Border.all(color: AppColors.white, width: 2) : null,
+        boxShadow: _canAdd
+            ? (compact
+                ? const [BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2))]
+                : AppShadows.brand)
+            : null,
       ),
       alignment: Alignment.center,
       child: iconOnly
@@ -90,6 +95,9 @@ class QuantityStepper extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(size / 2),
         border: Border.all(color: AppColors.brand, width: 1.5),
+        boxShadow: const [
+          BoxShadow(color: Color(0x2414231C), blurRadius: 8, offset: Offset(0, 2)),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

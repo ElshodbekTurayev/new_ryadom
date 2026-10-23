@@ -2,6 +2,8 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -25,6 +27,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       }
       this.logger.warn(`PostgreSQL not reachable (${err.message}). Activating the in-memory store for local development.`);
       await this.initInMemoryStore();
+      this.loadPersistedStore();
       this.wrapModelsWithMemoryFallback();
     }
   }
@@ -37,6 +40,64 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleDestroy() {
     if (this.isPostgresConnected) {
       await this.$disconnect();
+    } else {
+      this.flushPersistedStore();
+    }
+  }
+
+  // ---------- In-memory store persistence (development only) ----------
+  // `nest start --watch` restarts on every source change; without this every
+  // restart wiped uploaded logos/photos, password changes, products and orders
+  // back to the seed. Tests never persist so they stay hermetic.
+
+  private persistTimer: NodeJS.Timeout | null = null;
+
+  private static persistFile(): string | null {
+    if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) return null;
+    return resolve(process.cwd(), process.env.MEMORY_STORE_FILE || '.data/memory-store.json');
+  }
+
+  /** Overlays the persisted collections on the fresh seed; a missing or corrupt file keeps the seed. */
+  private loadPersistedStore() {
+    const file = PrismaService.persistFile();
+    if (!file || !existsSync(file)) return;
+    try {
+      const saved = JSON.parse(readFileSync(file, 'utf8'), (_key, value) =>
+        value && typeof value === 'object' && typeof value.$date === 'string' ? new Date(value.$date) : value,
+      );
+      for (const [key, rows] of Object.entries(saved ?? {})) {
+        if (Array.isArray(rows)) this.memoryStore[key] = rows;
+      }
+      this.logger.log(`In-memory store restored from ${file}`);
+    } catch (err: any) {
+      this.logger.warn(`Ignoring unreadable in-memory store file ${file}: ${err.message}`);
+    }
+  }
+
+  private schedulePersist() {
+    if (!PrismaService.persistFile() || this.persistTimer) return;
+    this.persistTimer = setTimeout(() => this.flushPersistedStore(), 250);
+    this.persistTimer.unref?.();
+  }
+
+  /** Write to a temp file then rename, so a crash mid-write never leaves a truncated store. */
+  private flushPersistedStore() {
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    const file = PrismaService.persistFile();
+    if (!file) return;
+    try {
+      mkdirSync(dirname(file), { recursive: true });
+      const json = JSON.stringify(this.memoryStore, function (this: any, key: string, value: any) {
+        const raw = this[key];
+        return raw instanceof Date ? { $date: raw.toISOString() } : value;
+      });
+      writeFileSync(`${file}.tmp`, json);
+      renameSync(`${file}.tmp`, file);
+    } catch (err: any) {
+      this.logger.warn(`Could not persist the in-memory store: ${err.message}`);
     }
   }
 
@@ -313,8 +374,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       { key: 'auditLog', storeKey: 'auditLogs' },
     ];
 
+    const mutations = ['create', 'createMany', 'update', 'updateMany', 'delete', 'deleteMany', 'upsert'];
     for (const { key, storeKey } of models) {
-      (this as any)[key] = this.createModelMemoryHandler(storeKey);
+      const handler: Record<string, (...args: any[]) => Promise<any>> = this.createModelMemoryHandler(storeKey);
+      for (const name of mutations) {
+        const original = handler[name];
+        if (!original) continue;
+        handler[name] = async (...args: any[]) => {
+          const result = await original(...args);
+          this.schedulePersist();
+          return result;
+        };
+      }
+      (this as any)[key] = handler;
     }
 
     // Override $transaction. The callback form gets rollback semantics: the whole
@@ -328,6 +400,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           return await cb(this);
         } catch (err) {
           this.memoryStore = snapshot;
+          this.schedulePersist();
           throw err;
         }
       }

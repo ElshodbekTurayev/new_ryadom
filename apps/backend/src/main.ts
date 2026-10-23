@@ -2,11 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import helmet from 'helmet';
 // cookie-parser is CommonJS (`module.exports = fn`) and this tsconfig has no esModuleInterop.
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { uploadDir } from './modules/uploads/uploads.controller';
 import { captureException, initSentry } from './common/observability/sentry';
 import { buildSwaggerDocument } from './swagger.config';
 
@@ -77,9 +77,13 @@ async function bootstrap() {
   // Global prefix as specified in Technical Spec v2 Section 13: All paths start with /api/v1
   app.setGlobalPrefix('api/v1');
 
-  // Serve static files for uploaded images (avatars, product photos, shop logos)
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+  // Serve uploaded images (avatars, product photos, shop logos) from the same
+  // directory the uploads controller writes to (UPLOAD_DIR). Names are random
+  // UUIDs, so the files never change and can be cached for good.
+  app.useStaticAssets(uploadDir(), {
     prefix: '/uploads/',
+    maxAge: '30d',
+    immutable: true,
   });
 
   // Global request validation pipeline

@@ -54,3 +54,7 @@ ECC/
 
 # Graphify knowledge-graph output (regenerate with: graphify update .)
 graphify-out/
+
+# Local dev data: in-memory store snapshot and uploaded images
+.data/
+uploads/

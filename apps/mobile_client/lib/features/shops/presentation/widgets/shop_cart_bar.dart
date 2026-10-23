@@ -42,29 +42,63 @@ class ShopCartBar extends ConsumerWidget {
                 scale: 0.98,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 child: Container(
-                  height: kShopCartBarHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  height: 58,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
-                    color: AppColors.brand,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    boxShadow: AppShadows.brand,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF168060), Color(0xFF0F5C45), Color(0xFF093E2F)],
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.rCard),
+                    border: Border.all(color: AppColors.white.withValues(alpha: 0.25), width: 1.0),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x4D0F5C45), blurRadius: 24, offset: Offset(0, 8)),
+                      BoxShadow(color: Color(0x20000000), blurRadius: 8, offset: Offset(0, 2)),
+                    ],
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.shoppingBag, size: 20, color: AppColors.white),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.white.withValues(alpha: 0.18),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.white.withValues(alpha: 0.28), width: 0.8),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(LucideIcons.shoppingBag, size: 18, color: AppColors.white),
+                      ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           '${ref.t('cart.title')} · ${ref.t('cart.itemsCount', {'count': '$count'})}',
-                          style: AppText.button.onBrand,
+                          style: AppText.button.onBrand.copyWith(letterSpacing: -0.2),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      AnimatedPriceText(total, style: AppText.priceLg.onBrand),
-                      const SizedBox(width: AppSpacing.xs),
-                      const Icon(LucideIcons.arrowRight, size: 18, color: AppColors.white),
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(color: AppColors.white.withValues(alpha: 0.25), width: 0.8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedPriceText(
+                              total,
+                              style: AppText.price.copyWith(color: AppColors.white, fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.white),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

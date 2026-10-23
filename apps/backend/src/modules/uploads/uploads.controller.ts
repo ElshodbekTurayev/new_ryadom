@@ -33,7 +33,8 @@ const WEBP_QUALITY = 85;
 /** Uploads: 30 per 15 minutes per client (the ThrottlerGuard is global). */
 const UPLOAD_THROTTLE = { default: { limit: 30, ttl: 15 * 60 * 1000 } };
 
-function uploadDir(): string {
+/** Where uploads are written — and, via main.ts, served from. */
+export function uploadDir(): string {
   // resolve() honours an absolute UPLOAD_DIR; relative paths are taken from the cwd.
   const dir = resolve(process.cwd(), process.env.UPLOAD_DIR || 'uploads');
   if (!existsSync(dir)) {

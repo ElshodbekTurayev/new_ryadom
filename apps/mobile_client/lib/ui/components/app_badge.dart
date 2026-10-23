@@ -36,12 +36,26 @@ class AppBadge extends StatelessWidget {
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: AppRadius.chip),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: AppRadius.chip,
+        border: Border.all(color: fg.withValues(alpha: 0.18), width: 0.8),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (dot) ...[
-            Container(width: 6, height: 6, decoration: BoxDecoration(color: fg, shape: BoxShape.circle)),
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: fg,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: fg.withValues(alpha: 0.45), blurRadius: 4),
+                ],
+              ),
+            ),
             const SizedBox(width: 5),
           ] else if (icon != null) ...[
             Icon(icon, size: size + 1, color: fg),
