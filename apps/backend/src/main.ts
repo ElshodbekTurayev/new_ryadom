@@ -48,12 +48,11 @@ async function bootstrap() {
     throw new Error('CORS_ORIGINS must be set in production (comma-separated list of allowed origins).');
   }
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: {
-      origin: corsOrigins,
-      credentials: true,
-    },
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Registered here rather than via the create() option: that one is applied at
+  // listen(), after the static /uploads handler below, so images went out without
+  // Access-Control-Allow-Origin and Flutter web could not load them.
+  app.enableCors({ origin: corsOrigins, credentials: true });
 
   // Behind a reverse proxy / load balancer the throttler must key on the real
   // client IP (X-Forwarded-For). Opt-in only: trusting the header on a directly
