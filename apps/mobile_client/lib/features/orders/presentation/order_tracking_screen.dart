@@ -337,18 +337,13 @@ class _StatusHero extends ConsumerWidget {
             key: ValueKey(status),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      ref.t('orderStatus.${status.value}'),
-                      style: AppText.sarlavhaL.copyWith(color: AppColors.white),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  const LiveTrackingBadge(),
-                ],
+              // Badge on its own line: beside the title it squeezed long
+              // statuses ("Yetkazilmoqda") into a mid-word line break.
+              const LiveTrackingBadge(),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                ref.t('orderStatus.${status.value}'),
+                style: AppText.sarlavhaL.copyWith(color: AppColors.white),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
@@ -365,7 +360,12 @@ class _StatusHero extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              OrderProgressStrip(status, height: 6),
+              OrderProgressStrip(
+                status,
+                height: 6,
+                doneColor: AppColors.white,
+                pendingColor: AppColors.white.withValues(alpha: 0.22),
+              ),
             ],
           ),
         ),

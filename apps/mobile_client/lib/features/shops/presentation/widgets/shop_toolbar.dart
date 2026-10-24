@@ -58,15 +58,20 @@ class _ShopToolbarShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: AppDurations.normal,
-      curve: AppCurves.standard,
+    // The height must match the sliver extent on every frame: animating it
+    // (e.g. when categories load and the bar grows) produced invalid sliver
+    // geometry and a RenderFlex overflow. Only the hairline animates.
+    return SizedBox(
       height: height,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border(bottom: BorderSide(color: stuck ? AppColors.border : Colors.transparent)),
+      child: AnimatedContainer(
+        duration: AppDurations.normal,
+        curve: AppCurves.standard,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border(bottom: BorderSide(color: stuck ? AppColors.border : Colors.transparent)),
+        ),
+        child: Center(child: ConstrainedBox(constraints: BoxConstraints(maxWidth: maxContentWidth), child: child)),
       ),
-      child: Center(child: ConstrainedBox(constraints: BoxConstraints(maxWidth: maxContentWidth), child: child)),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/i18n/date_text.dart';
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
 import '../../../orders/presentation/orders_history_controller.dart';
@@ -87,8 +87,8 @@ String formatRelativeDay(WidgetRef ref, DateTime at) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(local.year, local.month, local.day);
-  final time = DateFormat('HH:mm').format(local);
+  final time = formatTime(local);
   if (day == today) return '${ref.t('time.today')}, $time';
   if (day == today.subtract(const Duration(days: 1))) return '${ref.t('time.yesterday')}, $time';
-  return DateFormat('d MMM, HH:mm').format(local);
+  return formatShortDateTime(local, ref.read(localeProvider));
 }

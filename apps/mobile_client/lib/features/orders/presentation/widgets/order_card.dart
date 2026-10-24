@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/i18n/date_text.dart';
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
 import '../../domain/order.dart';
 import 'order_status_ui.dart';
-
-/// Formats an order timestamp as "12 Oct, 14:35" (locale-agnostic months).
-String formatOrderDate(DateTime dt) => DateFormat('d MMM, HH:mm').format(dt.toLocal());
 
 /// "#" + first 6 characters of the id — what the customer quotes on the phone.
 String orderShortRef(String id) => '#${id.length <= 6 ? id : id.substring(0, 6)}'.toUpperCase();
@@ -66,7 +63,7 @@ class OrderCard extends ConsumerWidget {
             children: [
               const Icon(LucideIcons.clock, size: 13, color: AppColors.textTertiary),
               const SizedBox(width: AppSpacing.xs),
-              Text(formatOrderDate(order.createdAt), style: AppText.caption),
+              Text(formatShortDateTime(order.createdAt, ref.watch(localeProvider)), style: AppText.caption),
               const SizedBox(width: AppSpacing.sm),
               Text('·', style: AppText.caption.tertiary),
               const SizedBox(width: AppSpacing.sm),

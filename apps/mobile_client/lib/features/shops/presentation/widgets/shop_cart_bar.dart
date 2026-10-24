@@ -73,7 +73,8 @@ class ShopCartBar extends ConsumerWidget {
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
-                          '${ref.t('cart.title')} · ${ref.t('cart.itemsCount', {'count': '$count'})}',
+                          // The bag icon already says "cart"; the count alone fits on narrow phones.
+                          ref.t('cart.itemsCount', {'count': '$count'}),
                           style: AppText.button.onBrand.copyWith(letterSpacing: -0.2),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

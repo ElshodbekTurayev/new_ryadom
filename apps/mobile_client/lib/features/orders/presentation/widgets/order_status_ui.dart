@@ -54,10 +54,20 @@ class OrderStatusBadge extends ConsumerWidget {
 /// Thin 4-segment progress strip; segments fill up to the current stage.
 /// Renders nothing for cancelled orders.
 class OrderProgressStrip extends StatelessWidget {
-  const OrderProgressStrip(this.status, {super.key, this.height = 4});
+  const OrderProgressStrip(
+    this.status, {
+    super.key,
+    this.height = 4,
+    this.doneColor = AppColors.brand,
+    this.pendingColor = AppColors.ink100,
+  });
 
   final OrderStatus status;
   final double height;
+  /// Override both on coloured backgrounds (e.g. the green tracking hero),
+  /// where brand-on-brand segments would be invisible.
+  final Color doneColor;
+  final Color pendingColor;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +83,7 @@ class OrderProgressStrip extends StatelessWidget {
               curve: AppCurves.standard,
               height: height,
               decoration: BoxDecoration(
-                color: i <= current ? AppColors.brand : AppColors.ink100,
+                color: i <= current ? doneColor : pendingColor,
                 borderRadius: BorderRadius.circular(height / 2),
               ),
             ),

@@ -48,11 +48,14 @@ class CartScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // Icon instead of a long red label that crowded the title; the
+          // confirm dialog still names the action.
           if (!isEmpty)
-            TextButton(
+            IconButton(
               onPressed: () => _confirmClear(context, ref),
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-              child: Text(ref.t('cart.clearCart')),
+              tooltip: ref.t('cart.clearCart'),
+              style: IconButton.styleFrom(backgroundColor: AppColors.dangerSoft),
+              icon: const Icon(LucideIcons.trash2, size: 20, color: AppColors.danger),
             ),
           const SizedBox(width: AppSpacing.sm),
         ],
