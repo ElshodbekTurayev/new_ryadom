@@ -263,5 +263,10 @@
     "ORDER_NOT_FOUND": "Buyurtma topilmadi.",
     "DUPLICATE_REQUEST": "So'rov allaqachon qayta ishlanmoqda.",
     "INTERNAL_SERVER_ERROR": "Serverda xatolik. Birozdan so'ng urinib ko'ring."
+  },
+  "splash": {
+    "scene1": "Mahallangizdagi do'konlar",
+    "scene2": "Kerakli mahsulotlar — bir joyda",
+    "scene3": "Eshigingizgacha tez yetkazamiz"
   }
 }

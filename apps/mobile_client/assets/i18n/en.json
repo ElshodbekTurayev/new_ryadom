@@ -263,5 +263,10 @@
     "ORDER_NOT_FOUND": "Order not found.",
     "DUPLICATE_REQUEST": "This request is already being processed.",
     "INTERNAL_SERVER_ERROR": "Server error. Please try again shortly."
+  },
+  "splash": {
+    "scene1": "Shops in your neighbourhood",
+    "scene2": "Everything you need in one place",
+    "scene3": "Fast delivery to your door"
   }
 }
