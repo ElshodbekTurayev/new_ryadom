@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import 'auth_controller.dart';
 import '../../../ui/ui.dart';
-import 'widgets/brand_mark.dart';
 
-/// Length of the scripted intro (three scenes, then the logo).
-const Duration kSplashIntroDuration = Duration(milliseconds: 3400);
+/// Length of the scripted intro: three scenes, the last one holding until
+/// the app opens.
+const Duration kSplashIntroDuration = Duration(milliseconds: 2700);
 
 /// How long the splash stays up at minimum, so the intro is seen even when
 /// auth resolves in a few milliseconds.
@@ -20,17 +20,15 @@ final splashMinDurationProvider = Provider<Duration>((ref) => kSplashIntroDurati
 final splashIntroDoneProvider = FutureProvider<void>((ref) => Future<void>.delayed(ref.watch(splashMinDurationProvider)));
 
 // Timeline (ms). Each scene slides in from the right, holds, and slides out
-// to the left as the next one arrives; the logo takes over after the third.
+// to the left as the next one arrives; the last one stays on screen.
 const _sceneSlot = 850;
 const _sceneSpan = 1050; // slot + overlap with the next scene
 const _sceneEnter = 320;
 const _sceneExit = 260;
-const _logoAt = 2550;
 
 /// Launch intro on the brand gradient: shop → groceries → delivery scenes
-/// with captions and step dots, then the logo springs in with ripple rings,
-/// the wordmark and a loading bar. Also hosts the retry when the profile
-/// could not be fetched.
+/// with captions and step dots. Also hosts the retry when the profile could
+/// not be fetched.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -69,19 +67,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     children: [
                       for (var i = 0; i < IntroScene.values.length; i++)
                         _SceneLayer(scene: IntroScene.values[i], caption: captions[i], index: i, ms: ms),
-                      if (ms < _logoAt + 300) Align(alignment: const Alignment(0, 0.72), child: _StepDots(ms: ms)),
-                      // Mounted only when its turn comes: its looping rings
-                      // would otherwise sit visible over the scenes.
-                      if (ms >= _logoAt || failed)
-                        Center(
-                          child: _LogoStage(
-                            appName: ref.t('common.appName'),
-                            tagline: ref.t('welcome.title'),
-                            failed: failed,
-                            errorText: failed ? '${ref.t('auth.sessionLoadFailed')}. ${ref.errorText(auth.error)}' : null,
-                            retryLabel: ref.t('common.retry'),
-                            onRetry: () => ref.invalidate(authControllerProvider),
-                          ),
+                      Align(alignment: const Alignment(0, 0.72), child: _StepDots(ms: ms)),
+                      if (failed)
+                        // Profile fetch failed for a non-auth reason (offline,
+                        // server down). The session is kept; let the user retry.
+                        Align(
+                          alignment: const Alignment(0, 0.95),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${ref.t('auth.sessionLoadFailed')}. ${ref.errorText(auth.error)}',
+                                  textAlign: TextAlign.center,
+                                  style: AppText.bodySm.withColor(AppColors.white),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                AppButton(
+                                  label: ref.t('common.retry'),
+                                  icon: LucideIcons.refreshCw,
+                                  variant: AppButtonVariant.secondary,
+                                  expand: false,
+                                  onPressed: () => ref.invalidate(authControllerProvider),
+                                ),
+                              ],
+                            ),
+                          ).animate().fadeIn(duration: AppDurations.slow),
                         ),
                     ],
                   );
@@ -111,10 +123,12 @@ class _SceneLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final start = index * _sceneSlot;
     final end = start + _sceneSpan;
-    if (ms < start || ms > end) return const SizedBox.shrink();
+    // The last scene never exits: it holds until the app opens.
+    final isLast = index == IntroScene.values.length - 1;
+    if (ms < start || (!isLast && ms > end)) return const SizedBox.shrink();
 
     final enter = _phase(ms, start, _sceneEnter, Curves.easeOutCubic);
-    final exit = _phase(ms, end - _sceneExit, _sceneExit, Curves.easeInCubic);
+    final exit = isLast ? 0.0 : _phase(ms, end - _sceneExit, _sceneExit, Curves.easeInCubic);
     final local = ms - start;
 
     // Per-scene life while on stage.
@@ -174,9 +188,8 @@ class _StepDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = (ms / _sceneSlot).floor().clamp(0, 2);
-    final fade = 1 - _phase(ms, _logoAt - 100, 300);
     return Opacity(
-      opacity: fade * _phase(ms, 0, 300),
+      opacity: _phase(ms, 0, 300),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -193,155 +206,6 @@ class _StepDots extends StatelessWidget {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// Final beat: ripple rings, the logo springing in, the wordmark typing in,
-/// the tagline and a loading bar (or the retry when the profile failed).
-class _LogoStage extends StatelessWidget {
-  const _LogoStage({
-    required this.appName,
-    required this.tagline,
-    required this.failed,
-    required this.errorText,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String appName;
-  final String tagline;
-  final bool failed;
-  final String? errorText;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    const at = 0; // mounted at _logoAt, so delays are relative to that
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 220,
-          height: 220,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              for (var i = 0; i < 3; i++) _RippleRing(delay: (at + 250 + i * 450).ms),
-              // Outer: one-shot spring entrance; inner: gentle breathing loop.
-              const BrandMark(size: 96)
-                  .animate(onPlay: (c) => c.repeat(reverse: true))
-                  .scaleXY(begin: 1, end: 1.035, duration: 1400.ms, curve: Curves.easeInOut)
-                  .animate(delay: at.ms)
-                  .fadeIn(duration: 250.ms)
-                  .scale(begin: const Offset(0.5, 0.5), end: const Offset(1, 1), duration: 750.ms, curve: Curves.elasticOut)
-                  .rotate(begin: -0.04, end: 0, duration: 600.ms, curve: AppCurves.emphasized),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        _Wordmark(text: appName, delay: at + 250),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-          child: Text(tagline, textAlign: TextAlign.center, style: AppText.body.withColor(AppColors.white.withValues(alpha: 0.82))),
-        ).animate(delay: (at + 550).ms).fadeIn(duration: 400.ms).moveY(begin: 10, end: 0, curve: AppCurves.emphasized),
-        const SizedBox(height: AppSpacing.xxxl),
-        if (failed) ...[
-          // Profile fetch failed for a non-auth reason (offline, server
-          // down). The session is kept; let the user try again.
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: Text(errorText ?? '', textAlign: TextAlign.center, style: AppText.bodySm.withColor(AppColors.white)),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AppButton(
-            label: retryLabel,
-            icon: LucideIcons.refreshCw,
-            variant: AppButtonVariant.secondary,
-            expand: false,
-            onPressed: onRetry,
-          ),
-        ] else
-          const _LoadingBar().animate(delay: (at + 700).ms).fadeIn(duration: 350.ms),
-      ],
-    );
-  }
-}
-
-/// The app name, each letter rising and un-blurring a beat after the last.
-class _Wordmark extends StatelessWidget {
-  const _Wordmark({required this.text, required this.delay});
-
-  final String text;
-  final int delay;
-
-  @override
-  Widget build(BuildContext context) {
-    final style = AppText.sarlavhaL.onBrand.copyWith(letterSpacing: -0.5);
-    final letters = text.characters.toList();
-    return Semantics(
-      label: text,
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < letters.length; i++)
-            Text(letters[i], style: style)
-                .animate(delay: (delay + i * 45).ms)
-                .fadeIn(duration: 300.ms)
-                .moveY(begin: 14, end: 0, duration: 420.ms, curve: AppCurves.emphasized)
-                .blurY(begin: 4, end: 0, duration: 300.ms),
-        ],
-      ),
-    );
-  }
-}
-
-/// A white ring that grows out of the logo and fades, on repeat.
-class _RippleRing extends StatelessWidget {
-  const _RippleRing({required this.delay});
-
-  final Duration delay;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: 110,
-        height: 110,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.5), width: 1.5),
-        ),
-      )
-          .animate(delay: delay, onPlay: (c) => c.repeat())
-          .scaleXY(begin: 0.85, end: 2.0, duration: 1800.ms, curve: Curves.easeOutCubic)
-          .fadeOut(begin: 0.55, duration: 1800.ms, curve: Curves.easeOut),
-    );
-  }
-}
-
-/// Indeterminate 120px bar: a bright segment sweeping across a faint track.
-class _LoadingBar extends StatelessWidget {
-  const _LoadingBar();
-
-  @override
-  Widget build(BuildContext context) {
-    const width = 120.0;
-    const segment = 40.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      child: Container(
-        width: width,
-        height: 3,
-        color: AppColors.white.withValues(alpha: 0.18),
-        alignment: Alignment.centerLeft,
-        child: Container(width: segment, height: 3, color: AppColors.white)
-            .animate(onPlay: (c) => c.repeat())
-            .moveX(begin: -segment, end: width, duration: 1100.ms, curve: Curves.easeInOutCubic),
       ),
     );
   }
