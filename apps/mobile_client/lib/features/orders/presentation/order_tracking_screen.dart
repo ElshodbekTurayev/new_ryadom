@@ -326,48 +326,78 @@ class _StatusHero extends ConsumerWidget {
       // minute countdown — we don't have a real ETA for an order yet, and a
       // made-up one would be a promise we can't keep.
       return Container(
-        decoration: BoxDecoration(color: AppColors.brand, borderRadius: AppRadius.card, boxShadow: AppShadows.brand),
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: AnimatedSwitcher(
-          duration: AppDurations.slow,
-          switchInCurve: AppCurves.standard,
-          switchOutCurve: Curves.easeIn,
-          layoutBuilder: (current, previous) => Stack(alignment: Alignment.topLeft, children: [...previous, ?current]),
-          child: Column(
-            key: ValueKey(status),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Badge on its own line: beside the title it squeezed long
-              // statuses ("Yetkazilmoqda") into a mid-word line break.
-              const LiveTrackingBadge(),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                ref.t('orderStatus.${status.value}'),
-                style: AppText.sarlavhaL.copyWith(color: AppColors.white),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                ref.t('order.hint.${status.value}'),
-                style: AppText.body.copyWith(color: AppColors.white.withValues(alpha: 0.88)),
-              ),
-              if (subtitle.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  subtitle,
-                  style: AppText.caption.copyWith(color: AppColors.white.withValues(alpha: 0.72)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              OrderProgressStrip(
-                status,
-                height: 6,
-                doneColor: AppColors.white,
-                pendingColor: AppColors.white.withValues(alpha: 0.22),
-              ),
-            ],
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF168060), Color(0xFF0F5C45), Color(0xFF09392B)],
           ),
+          borderRadius: AppRadius.card,
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.2), width: 1.0),
+          boxShadow: const [
+            BoxShadow(color: Color(0x380F5C45), blurRadius: 22, offset: Offset(0, 8)),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Positioned(
+              right: -30,
+              top: -30,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.white.withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: AnimatedSwitcher(
+                duration: AppDurations.slow,
+                switchInCurve: AppCurves.standard,
+                switchOutCurve: Curves.easeIn,
+                layoutBuilder: (current, previous) => Stack(alignment: Alignment.topLeft, children: [...previous, ?current]),
+                child: Column(
+                  key: ValueKey(status),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Badge on its own line: beside the title it squeezed long
+                    // statuses ("Yetkazilmoqda") into a mid-word line break.
+                    const LiveTrackingBadge(),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      ref.t('orderStatus.${status.value}'),
+                      style: AppText.sarlavhaL.copyWith(color: AppColors.white, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      ref.t('order.hint.${status.value}'),
+                      style: AppText.body.copyWith(color: AppColors.white.withValues(alpha: 0.9)),
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        subtitle,
+                        style: AppText.caption.copyWith(color: AppColors.white.withValues(alpha: 0.75)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.lg),
+                    OrderProgressStrip(
+                      status,
+                      height: 6,
+                      doneColor: AppColors.white,
+                      pendingColor: AppColors.white.withValues(alpha: 0.22),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }

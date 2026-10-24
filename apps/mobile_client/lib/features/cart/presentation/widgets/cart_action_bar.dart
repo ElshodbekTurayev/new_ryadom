@@ -27,6 +27,9 @@ class CartActionBar extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.divider)),
+        boxShadow: [
+          BoxShadow(color: Color(0x0C14231C), blurRadius: 16, offset: Offset(0, -4)),
+        ],
       ),
       child: SafeArea(
         top: false,
@@ -64,6 +67,7 @@ class _TotalPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.18),
         borderRadius: AppRadius.chip,
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.28), width: 0.8),
       ),
       child: PriceText(total, style: AppText.button.onBrand),
     );

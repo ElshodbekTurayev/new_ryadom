@@ -81,9 +81,23 @@ class _CountryPrefix extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.sm),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: 6),
-        decoration: BoxDecoration(color: AppColors.ink100, borderRadius: BorderRadius.circular(AppRadius.xs)),
-        child: Text('+998', style: AppText.bodyStrong.copyWith(color: AppColors.ink700)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.brandSoft,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: AppColors.brand.withValues(alpha: 0.18), width: 1.0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🇺🇿', style: TextStyle(fontSize: 15)),
+            const SizedBox(width: 5),
+            Text(
+              '+998',
+              style: AppText.bodyStrong.copyWith(color: AppColors.brand, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }

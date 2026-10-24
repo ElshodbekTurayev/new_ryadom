@@ -191,7 +191,15 @@ class _StepCircle extends StatelessWidget {
         return Container(
           width: size,
           height: size,
-          decoration: BoxDecoration(color: muted ? AppColors.ink300 : AppColors.brand, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: muted ? AppColors.ink300 : AppColors.brand,
+            shape: BoxShape.circle,
+            boxShadow: muted
+                ? null
+                : const [
+                    BoxShadow(color: Color(0x300F5C45), blurRadius: 6, offset: Offset(0, 2)),
+                  ],
+          ),
           alignment: Alignment.center,
           child: const Icon(LucideIcons.check, size: 16, color: AppColors.white),
         );
@@ -203,6 +211,9 @@ class _StepCircle extends StatelessWidget {
             color: AppColors.brandSoft,
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.brand, width: 2),
+            boxShadow: const [
+              BoxShadow(color: Color(0x330F5C45), blurRadius: 8, spreadRadius: 1),
+            ],
           ),
           alignment: Alignment.center,
           child: const PulsingDot(size: 8),

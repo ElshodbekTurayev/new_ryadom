@@ -176,14 +176,21 @@ class LiveTrackingBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs, AppSpacing.sm + 2, AppSpacing.xs),
-      decoration: BoxDecoration(color: AppColors.green100, borderRadius: AppRadius.chip),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.18),
+        borderRadius: AppRadius.chip,
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.28), width: 0.8),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PulsingDot(size: 7, color: AppColors.green600, active: active),
-          const SizedBox(width: AppSpacing.xs),
-          Text(ref.t('order.liveTracking'), style: AppText.captionStrong.copyWith(color: AppColors.green700)),
+          PulsingDot(size: 7, color: const Color(0xFF34D399), active: active),
+          const SizedBox(width: 6),
+          Text(
+            ref.t('order.liveTracking'),
+            style: AppText.captionStrong.copyWith(color: AppColors.white, letterSpacing: 0.1),
+          ),
         ],
       ),
     );

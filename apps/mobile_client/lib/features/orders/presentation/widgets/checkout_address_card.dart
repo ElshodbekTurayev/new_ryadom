@@ -37,7 +37,11 @@ class CheckoutAddressCard extends ConsumerWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(color: AppColors.green50, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: AppColors.green50,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.green300.withValues(alpha: 0.6), width: 1.0),
+              ),
               alignment: Alignment.center,
               child: const Icon(LucideIcons.mapPin, size: 20, color: AppColors.green700),
             ),

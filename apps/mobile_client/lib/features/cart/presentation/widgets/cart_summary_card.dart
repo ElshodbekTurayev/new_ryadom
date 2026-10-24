@@ -71,13 +71,24 @@ class DeliveryInfoStrip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(color: AppColors.green50, borderRadius: BorderRadius.circular(AppRadius.md)),
+      decoration: BoxDecoration(
+        color: AppColors.green50,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.green300.withValues(alpha: 0.6), width: 0.8),
+      ),
       child: Row(
         children: [
           Container(
             width: 36,
             height: 36,
-            decoration: const BoxDecoration(color: AppColors.green100, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.green300.withValues(alpha: 0.4), width: 0.8),
+              boxShadow: const [
+                BoxShadow(color: Color(0x1014231C), blurRadius: 4, offset: Offset(0, 1)),
+              ],
+            ),
             alignment: Alignment.center,
             child: const Icon(LucideIcons.bike, size: 18, color: AppColors.green700),
           ),

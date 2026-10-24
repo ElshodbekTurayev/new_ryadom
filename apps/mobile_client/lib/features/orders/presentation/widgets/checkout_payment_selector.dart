@@ -132,7 +132,15 @@ class _PaymentOption extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected ? AppColors.green50 : AppColors.surface,
             borderRadius: AppRadius.control,
-            border: Border.all(color: selected ? AppColors.brand : AppColors.border, width: selected ? 1.5 : 1),
+            border: Border.all(
+              color: selected ? AppColors.brand : AppColors.border,
+              width: selected ? 1.5 : 1.0,
+            ),
+            boxShadow: selected
+                ? const [
+                    BoxShadow(color: Color(0x180F5C45), blurRadius: 10, offset: Offset(0, 3)),
+                  ]
+                : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

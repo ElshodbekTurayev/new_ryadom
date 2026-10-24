@@ -29,7 +29,11 @@ class OrderSegmentedControl extends StatelessWidget {
     return Container(
       height: height,
       padding: const EdgeInsets.all(inset),
-      decoration: BoxDecoration(color: AppColors.ink100, borderRadius: AppRadius.control),
+      decoration: BoxDecoration(
+        color: AppColors.ink100,
+        borderRadius: AppRadius.control,
+        border: Border.all(color: const Color(0x0C14231C), width: 1.0),
+      ),
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, _) {
@@ -46,7 +50,8 @@ class OrderSegmentedControl extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(AppRadius.md - inset),
-                      boxShadow: AppShadows.xs,
+                      border: Border.all(color: const Color(0x0A14231C), width: 0.8),
+                      boxShadow: AppShadows.sm,
                     ),
                   ),
                 ),

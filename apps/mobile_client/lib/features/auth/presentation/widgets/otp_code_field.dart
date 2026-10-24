@@ -162,9 +162,12 @@ class _CodeBox extends StatelessWidget {
       height: OtpCodeField.boxHeight,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.ink50,
+        color: active ? AppColors.white : AppColors.ink50,
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: borderColor, width: active || error ? 1.5 : 1),
+        border: Border.all(color: borderColor, width: active || error ? 1.8 : 1.0),
+        boxShadow: active
+            ? const [BoxShadow(color: Color(0x280F5C45), blurRadius: 8, offset: Offset(0, 2))]
+            : null,
       ),
       child: AnimatedSwitcher(
         duration: AppDurations.fast,

@@ -29,12 +29,22 @@ class CartItemTile extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppImage(
-              url: product.imageUrl,
-              width: 64,
-              height: 64,
-              radius: BorderRadius.circular(AppRadius.md),
-              fallbackIcon: LucideIcons.shoppingBag,
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.ink50,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: const Color(0x0C14231C), width: 0.8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.md - 1),
+                child: AppImage(
+                  url: product.imageUrl,
+                  width: 64,
+                  height: 64,
+                  radius: BorderRadius.zero,
+                  fallbackIcon: LucideIcons.shoppingBag,
+                ),
+              ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -80,7 +90,13 @@ class _RemoveBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.danger,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [Color(0x00B42318), Color(0xFFD92D20)],
+        ),
+      ),
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.only(right: AppSpacing.xxl),
       child: const Icon(LucideIcons.trash2, size: 22, color: AppColors.white),
