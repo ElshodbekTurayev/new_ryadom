@@ -6,28 +6,26 @@ import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../../../ui/ui.dart';
 
 class OnboardingSlide {
-  const OnboardingSlide({required this.illustration, required this.title, required this.subtitle});
+  const OnboardingSlide({required this.scene, required this.title, required this.subtitle});
 
-  final AppIllustration illustration;
+  final IntroScene scene;
   final String title;
   final String subtitle;
 }
 
-/// Auto-advancing PageView of illustrated slides with an animated dots
-/// indicator. Auto-advance pauses while the user is swiping and restarts
+/// Auto-advancing PageView of slides — each the app's scene art on a
+/// brand-green card (same art as the launch intro and Home promos) with a
+/// title and subtitle — plus an animated dots indicator. Auto-advance pauses while the user is swiping and restarts
 /// from a full interval afterwards.
 class OnboardingSlides extends StatefulWidget {
   const OnboardingSlides({
     super.key,
     required this.slides,
     this.interval = const Duration(milliseconds: 3500),
-    this.illustrationSize = 200,
   });
 
   final List<OnboardingSlide> slides;
   final Duration interval;
-  final double illustrationSize;
-
   @override
   State<OnboardingSlides> createState() => _OnboardingSlidesState();
 }
@@ -85,7 +83,14 @@ class _OnboardingSlidesState extends State<OnboardingSlides> {
               controller: _controller,
               itemCount: widget.slides.length,
               onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (context, i) => _Slide(slide: widget.slides[i], illustrationSize: widget.illustrationSize),
+              // Parallax: art and text drift at different speeds while swiping.
+              itemBuilder: (context, i) => AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  final page = _controller.hasClients && _controller.position.haveDimensions ? _controller.page ?? 0 : _page.toDouble();
+                  return _Slide(slide: widget.slides[i], offset: (i - page).clamp(-1.0, 1.0));
+                },
+              ),
             ),
           ),
         ),
@@ -97,32 +102,100 @@ class _OnboardingSlidesState extends State<OnboardingSlides> {
 }
 
 class _Slide extends StatelessWidget {
-  const _Slide({required this.slide, required this.illustrationSize});
+  const _Slide({required this.slide, required this.offset});
 
   final OnboardingSlide slide;
-  final double illustrationSize;
+
+  /// -1..1: how far this page is from the centre of the viewport.
+  final double offset;
 
   @override
   Widget build(BuildContext context) {
+    final fade = 1 - offset.abs() * 0.6;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(child: Illustration(slide.illustration, size: illustrationSize)),
+              Flexible(
+                child: AspectRatio(
+                  aspectRatio: 1.05,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.brandGradient,
+                      borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      boxShadow: AppShadows.brand,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Soft light blooms, shifted against the swipe for depth.
+                        Positioned(
+                          top: -60 + offset * 20,
+                          right: -50 - offset * 40,
+                          child: _Bloom(size: 220, opacity: 0.10),
+                        ),
+                        Positioned(
+                          bottom: -70,
+                          left: -60 + offset * 40,
+                          child: _Bloom(size: 200, opacity: 0.06),
+                        ),
+                        Transform.translate(
+                          offset: Offset(offset * 90, 0),
+                          child: Transform.scale(
+                            scale: 1 - offset.abs() * 0.12,
+                            child: FractionallySizedBox(widthFactor: 0.78, child: IntroSceneArt(slide.scene, size: 260)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.xxl),
-              Text(slide.title, textAlign: TextAlign.center, style: AppText.h2, maxLines: 2, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: AppSpacing.sm),
-              Text(slide.subtitle, textAlign: TextAlign.center, style: AppText.body.secondary, maxLines: 2, overflow: TextOverflow.ellipsis),
+              Opacity(
+                opacity: fade.clamp(0.0, 1.0),
+                child: Transform.translate(
+                  offset: Offset(offset * 40, 0),
+                  child: Column(
+                    children: [
+                      Text(slide.title, textAlign: TextAlign.center, style: AppText.h1, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        slide.subtitle,
+                        textAlign: TextAlign.center,
+                        style: AppText.bodyLg.secondary,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _Bloom extends StatelessWidget {
+  const _Bloom({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.white.withValues(alpha: opacity)),
+      );
 }
 
 class _Dots extends StatelessWidget {
