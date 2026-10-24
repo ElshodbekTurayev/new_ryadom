@@ -107,12 +107,15 @@ class _SegmentLabel extends StatelessWidget {
             ),
             if (count != null) ...[
               const SizedBox(width: 6),
+              // Fixed 18px pill: with only `alignment` the Container took the
+              // full segment height and looked like a tall tab.
               Container(
-                constraints: const BoxConstraints(minWidth: 20),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.xxs),
+                height: 18,
+                constraints: const BoxConstraints(minWidth: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
                 decoration: BoxDecoration(color: countBg, borderRadius: AppRadius.chip),
                 alignment: Alignment.center,
-                child: Text('$count', style: AppText.captionStrong.copyWith(color: countFg)),
+                child: Text('$count', style: AppText.micro.copyWith(color: countFg, fontSize: 11, height: 1)),
               ),
             ],
           ],
