@@ -120,6 +120,7 @@ class AppIconButton extends StatelessWidget {
     this.bordered = true,
     this.shadow = false,
     this.tooltip,
+    this.loading = false,
   });
 
   final IconData icon;
@@ -131,11 +132,13 @@ class AppIconButton extends StatelessWidget {
   final bool bordered;
   final bool shadow;
   final String? tooltip;
+  /// Swaps the icon for a spinner and ignores taps.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     final button = Pressable(
-      onTap: onPressed,
+      onTap: loading ? null : onPressed,
       haptic: true,
       scale: 0.92,
       child: Container(
@@ -148,7 +151,13 @@ class AppIconButton extends StatelessWidget {
           boxShadow: shadow ? AppShadows.sm : null,
         ),
         alignment: Alignment.center,
-        child: Icon(icon, size: iconSize, color: onPressed == null ? AppColors.ink300 : foreground),
+        child: loading
+            ? SizedBox(
+                width: iconSize - 2,
+                height: iconSize - 2,
+                child: CircularProgressIndicator(strokeWidth: 2.2, color: foreground),
+              )
+            : Icon(icon, size: iconSize, color: onPressed == null ? AppColors.ink300 : foreground),
       ),
     );
     return tooltip == null ? button : Tooltip(message: tooltip!, child: button);

@@ -80,6 +80,8 @@
     "mapView": "Карта",
     "listView": "Список",
     "myLocation": "Моё местоположение",
+    "addressSaved": "Адрес сохранён: {{address}}",
+    "tapMapHint": "Нажмите на карту, чтобы выбрать адрес",
     "greeting": "Что закажем, {{name}}?",
     "greetingAnon": "Что закажем?",
     "heroChip": "Быстрая доставка",

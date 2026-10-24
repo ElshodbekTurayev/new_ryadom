@@ -51,7 +51,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// launches detect the location silently if permission was already granted.
   Future<void> _maybePromptForLocation() async {
     if (!mounted || !ref.read(locationPromptEnabledProvider)) return;
-    if (ref.read(addressControllerProvider) != SelectedAddress.tashkentDefault) return;
+    // A saved address from an earlier session wins over a fresh GPS lookup.
+    await ref.read(addressControllerProvider.notifier).restored;
+    if (!mounted || ref.read(addressControllerProvider) != SelectedAddress.tashkentDefault) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool(_locationPromptedKey) ?? false) return await _detectSilently();

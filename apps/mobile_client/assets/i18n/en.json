@@ -80,6 +80,8 @@
     "mapView": "Map",
     "listView": "List",
     "myLocation": "My location",
+    "addressSaved": "Address saved: {{address}}",
+    "tapMapHint": "Tap the map to pick an address",
     "greeting": "What are we ordering, {{name}}?",
     "greetingAnon": "What are we ordering?",
     "heroChip": "Fast delivery",

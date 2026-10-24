@@ -24,6 +24,26 @@ class SelectedAddress {
   /// True until a real point is detected or picked (the city-centre default).
   bool get isPlaceholder => identical(this, tashkentDefault);
 
+  factory SelectedAddress.fromJson(Map<String, dynamic> json) => SelectedAddress(
+        lat: (json['lat'] as num).toDouble(),
+        lng: (json['lng'] as num).toDouble(),
+        addressText: json['addressText'] as String,
+        entrance: json['entrance'] as String?,
+        floor: json['floor'] as String?,
+        apartment: json['apartment'] as String?,
+        doorCode: json['doorCode'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'lat': lat,
+        'lng': lng,
+        'addressText': addressText,
+        if (entrance != null) 'entrance': entrance,
+        if (floor != null) 'floor': floor,
+        if (apartment != null) 'apartment': apartment,
+        if (doorCode != null) 'doorCode': doorCode,
+      };
+
   SelectedAddress copyWith({
     double? lat,
     double? lng,

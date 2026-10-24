@@ -10,7 +10,9 @@ import 'package:localshop_shared/localshop_shared.dart';
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
 import '../../../location/domain/selected_address.dart';
+import '../../../location/presentation/address_controller.dart';
 import '../../../location/presentation/app_map_tiles.dart';
+import '../../../location/presentation/location_feedback.dart';
 import '../../domain/eta.dart';
 import '../../domain/shop.dart';
 import 'home_header.dart';
@@ -57,6 +59,17 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
   String? _selectedId;
   Shop? _previewShop;
 
+  /// GPS lookup from the locate button is running.
+  bool _locating = false;
+
+  /// Point the user tapped while its address is being resolved; drawn as a pin.
+  LatLng? _picking;
+  int _pickSeq = 0;
+
+  /// The address came from a map tap: keep the camera where the user is
+  /// looking instead of re-framing the whole radius.
+  bool _pickedOnMap = false;
+
   LatLng get _home => LatLng(widget.address.lat, widget.address.lng);
 
   /// Frames "you" plus every shop pin, clear of the top controls and the
@@ -79,7 +92,7 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
     final moved = old.address.lat != widget.address.lat || old.address.lng != widget.address.lng;
     final shopsChanged = old.shops.length != widget.shops.length ||
         !old.shops.every((s) => widget.shops.any((n) => n.id == s.id));
-    if (_mapReady && (moved || (shopsChanged && _selectedId == null))) {
+    if (_mapReady && !_pickedOnMap && (moved || (shopsChanged && _selectedId == null))) {
       _fly.stop();
       _map.fitCamera(_overviewFit);
     }
@@ -135,6 +148,50 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
     }
   }
 
+  /// Locate button: real GPS fix → reverse-geocode → saved as the delivery
+  /// address (the nearby list refetches on its own).
+  Future<void> _locateMe() async {
+    if (_locating) return;
+    setState(() {
+      _locating = true;
+      _pickedOnMap = false;
+    });
+    final before = widget.address;
+    try {
+      await ref.read(addressControllerProvider.notifier).detectCurrentLocation(lang: ref.read(localeProvider).value);
+      if (!mounted) return;
+      final saved = ref.read(addressControllerProvider);
+      // Same spot as before → didUpdateWidget will not move the camera.
+      if (saved.lat == before.lat && saved.lng == before.lng) _animateTo(_home, zoom: _homeZoom);
+      _toastSaved(saved);
+    } on LocationException catch (e) {
+      if (mounted) showLocationError(context, ref, e);
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
+  /// Tap on empty map: resolve that point's address and save it. A newer tap
+  /// supersedes a lookup that is still running.
+  Future<void> _pickPoint(LatLng point) async {
+    final seq = ++_pickSeq;
+    setState(() {
+      _picking = point;
+      _pickedOnMap = true;
+      _selectedId = null;
+    });
+    final saved = await ref
+        .read(addressControllerProvider.notifier)
+        .pickPoint(point.latitude, point.longitude, lang: ref.read(localeProvider).value);
+    if (!mounted || seq != _pickSeq) return;
+    setState(() => _picking = null);
+    _toastSaved(saved);
+  }
+
+  void _toastSaved(SelectedAddress address) {
+    showAppToast(context, ref.t('home.addressSaved', {'address': address.addressText}), tone: ToastTone.success);
+  }
+
   void _onPositionChanged(MapCamera camera, bool hasGesture) {
     if (hasGesture && _selectedId != null) setState(() => _selectedId = null);
   }
@@ -157,6 +214,7 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
                 backgroundColor: AppColors.ink100,
                 onMapReady: () => _mapReady = true,
                 onPositionChanged: _onPositionChanged,
+                onTap: (_, point) => _pickPoint(point),
               ),
               children: [
                 appTileLayer(context),
@@ -184,6 +242,17 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
                         child: ShopPin(shop: shop, selected: shop.id == selected, onTap: () => _select(shop)),
                       ),
                     Marker(point: _home, width: 56, height: 56, child: const PulsingDot()),
+                    if (_picking case final point?)
+                      Marker(
+                        point: point,
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.topCenter,
+                        child: const Icon(LucideIcons.mapPin, size: 36, color: AppColors.brand)
+                            .animate()
+                            .moveY(begin: -14, end: 0, duration: AppDurations.normal, curve: AppCurves.emphasized)
+                            .fadeIn(duration: AppDurations.fast),
+                      ),
                   ],
                 ),
               ],
@@ -218,7 +287,8 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
                     bordered: false,
                     foreground: AppColors.brand,
                     tooltip: ref.t('home.myLocation'),
-                    onPressed: () => _animateTo(_home, zoom: _homeZoom),
+                    loading: _locating,
+                    onPressed: _locateMe,
                   ),
                 ],
               ),
@@ -233,7 +303,21 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(padding: EdgeInsets.only(left: AppSpacing.page), child: MapAttribution()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+                child: Row(
+                  children: [
+                    const MapAttribution(),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _MapHint(text: ref.t(_picking == null ? 'home.tapMapHint' : 'home.locating'), busy: _picking != null),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               if (shops.isEmpty)
                 Padding(
@@ -304,6 +388,40 @@ class _ShopsMapViewState extends ConsumerState<ShopsMapView> with SingleTickerPr
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Small frosted chip telling the user a map tap picks the address.
+class _MapHint extends StatelessWidget {
+  const _MapHint({required this.text, required this.busy});
+
+  final String text;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: 0.92),
+          borderRadius: AppRadius.chip,
+          boxShadow: AppShadows.sm,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            busy
+                ? const SizedBox(width: 11, height: 11, child: CircularProgressIndicator(strokeWidth: 1.6))
+                : const Icon(LucideIcons.mousePointerClick, size: 12, color: AppColors.brand),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.micro.copyWith(color: AppColors.textPrimary)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

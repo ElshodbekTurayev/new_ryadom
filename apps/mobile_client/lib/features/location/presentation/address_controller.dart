@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/geocoding_api.dart';
 import '../domain/selected_address.dart';
 
@@ -15,10 +18,48 @@ final geocodingApiProvider = Provider<GeocodingApi>((ref) => GeocodingApi());
 final addressControllerProvider = NotifierProvider<AddressController, SelectedAddress>(AddressController.new);
 
 class AddressController extends Notifier<SelectedAddress> {
-  @override
-  SelectedAddress build() => SelectedAddress.tashkentDefault;
+  static const _prefsKey = 'ryadom_delivery_address';
 
-  void setManual(SelectedAddress address) => state = address;
+  /// Completes once the last saved address has been read back from storage,
+  /// so callers that decide on a fresh GPS lookup do not race the restore.
+  Future<void> restored = Future.value();
+
+  @override
+  SelectedAddress build() {
+    restored = _restore();
+    return SelectedAddress.tashkentDefault;
+  }
+
+  Future<void> _restore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_prefsKey);
+      if (raw == null || !state.isPlaceholder) return;
+      state = SelectedAddress.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      // No persistent storage (tests, private mode) or a corrupt entry: keep the default.
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKey, jsonEncode(state.toJson()));
+    } catch (_) {}
+  }
+
+  void setManual(SelectedAddress address) {
+    state = address;
+    _save();
+  }
+
+  /// Reverse-geocodes a point picked on a map and makes it the delivery
+  /// address. Entrance/floor details belong to the old place, so they reset.
+  Future<SelectedAddress> pickPoint(double lat, double lng, {String lang = 'uz'}) async {
+    final addressText = await ref.read(geocodingApiProvider).reverseGeocode(lat, lng, lang: lang);
+    setManual(SelectedAddress(lat: lat, lng: lng, addressText: addressText));
+    return state;
+  }
 
   /// Detects the device's current position and reverse-geocodes it. Throws
   /// [LocationException] with a specific reason the UI can message clearly,
@@ -27,8 +68,7 @@ class AddressController extends Notifier<SelectedAddress> {
   Future<void> detectCurrentLocation({String lang = 'uz', bool requestPermission = true}) async {
     final position = await currentPosition(requestPermission: requestPermission);
     try {
-      final addressText = await ref.read(geocodingApiProvider).reverseGeocode(position.latitude, position.longitude, lang: lang);
-      state = SelectedAddress(lat: position.latitude, lng: position.longitude, addressText: addressText);
+      await pickPoint(position.latitude, position.longitude, lang: lang);
     } catch (_) {
       throw LocationException(LocationFailureReason.unknown);
     }

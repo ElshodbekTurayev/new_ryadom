@@ -80,6 +80,8 @@
     "mapView": "Xarita",
     "listView": "Ro'yxat",
     "myLocation": "Mening joylashuvim",
+    "addressSaved": "Manzil saqlandi: {{address}}",
+    "tapMapHint": "Manzilni tanlash uchun xaritani bosing",
     "greeting": "Nima buyurtma qilamiz, {{name}}?",
     "greetingAnon": "Nima buyurtma qilamiz?",
     "heroChip": "Tezkor yetkazish",
