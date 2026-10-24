@@ -31,12 +31,17 @@ class WelcomeScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   const SizedBox(height: AppSpacing.lg),
-                  const AppLogo(size: 38),
+                  // Picks up where the splash left off: logo drops in, then the
+                  // slides rise, then the bottom panel slides up.
+                  const AppLogo(size: 38)
+                      .animate()
+                      .fadeIn(duration: AppDurations.slow)
+                      .moveY(begin: -12, end: 0, duration: 420.ms, curve: AppCurves.emphasized),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: OnboardingSlides(slides: slides),
-                    ),
+                    ).animate(delay: 120.ms).fadeIn(duration: 420.ms).scaleXY(begin: 0.96, end: 1, curve: AppCurves.emphasized),
                   ),
                 ],
               ),
@@ -76,7 +81,7 @@ class WelcomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          ).animate().fadeIn(duration: AppDurations.slow).moveY(begin: 24, end: 0, curve: AppCurves.emphasized),
+          ).animate(delay: 220.ms).fadeIn(duration: AppDurations.slow).moveY(begin: 24, end: 0, curve: AppCurves.emphasized),
         ],
       ),
     );

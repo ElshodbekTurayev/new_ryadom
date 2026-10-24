@@ -19,7 +19,8 @@ class BrandMark extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.xl),
         boxShadow: AppShadows.lg,
       ),
-      child: Text('R', style: AppText.display.brand.weight(900).copyWith(height: 1)),
+      // Letter scales with the tile so the mark keeps its proportions.
+      child: Text('R', style: AppText.display.brand.weight(900).copyWith(height: 1, fontSize: size * 0.54)),
     );
   }
 }

@@ -21,6 +21,7 @@ class _RouterRefreshNotifier extends ChangeNotifier {
         notifyListeners();
       }
     });
+    ref.listen(splashIntroDoneProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -40,6 +41,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (auth.isLoading || (auth.hasError && !auth.hasValue)) {
         return path == '/splash' ? null : '/splash';
       }
+      // Let the brand intro finish before leaving the splash.
+      if (path == '/splash' && !ref.read(splashIntroDoneProvider).hasValue) return null;
 
       final isAuthenticated = auth.valueOrNull != null;
       final inAuthFlow = path.startsWith('/welcome') || path.startsWith('/auth');
