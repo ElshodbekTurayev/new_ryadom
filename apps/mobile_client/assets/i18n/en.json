@@ -217,7 +217,14 @@
     "about": "About the app",
     "version": "Version {{version}}",
     "logoutQuestion": "Log out of your account?",
-    "logoutButton": "Log out"
+    "logoutButton": "Log out",
+    "editProfile": "Edit profile",
+    "nameLabel": "Name",
+    "nameRequired": "Enter your name",
+    "phoneLabel": "Phone number",
+    "phoneLocked": "Your phone number is tied to your account and cannot be changed",
+    "saved": "Profile saved",
+    "settingsSection": "Settings"
   },
   "tabs": {
     "home": "Home",

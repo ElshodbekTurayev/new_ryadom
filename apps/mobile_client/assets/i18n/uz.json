@@ -217,7 +217,14 @@
     "about": "Ilova haqida",
     "version": "Versiya {{version}}",
     "logoutQuestion": "Hisobdan chiqmoqchimisiz?",
-    "logoutButton": "Hisobdan chiqish"
+    "logoutButton": "Hisobdan chiqish",
+    "editProfile": "Profilni tahrirlash",
+    "nameLabel": "Ism",
+    "nameRequired": "Ismingizni kiriting",
+    "phoneLabel": "Telefon raqam",
+    "phoneLocked": "Telefon raqam hisobingizga bog'langan, uni o'zgartirib bo'lmaydi",
+    "saved": "Profil saqlandi",
+    "settingsSection": "Sozlamalar"
   },
   "tabs": {
     "home": "Asosiy",

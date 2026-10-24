@@ -217,7 +217,14 @@
     "about": "О приложении",
     "version": "Версия {{version}}",
     "logoutQuestion": "Выйти из аккаунта?",
-    "logoutButton": "Выйти из аккаунта"
+    "logoutButton": "Выйти из аккаунта",
+    "editProfile": "Редактировать профиль",
+    "nameLabel": "Имя",
+    "nameRequired": "Введите ваше имя",
+    "phoneLabel": "Номер телефона",
+    "phoneLocked": "Номер привязан к аккаунту и не может быть изменён",
+    "saved": "Профиль сохранён",
+    "settingsSection": "Настройки"
   },
   "tabs": {
     "home": "Главная",

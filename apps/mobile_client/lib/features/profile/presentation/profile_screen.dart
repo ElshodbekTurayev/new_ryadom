@@ -6,6 +6,8 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/presentation/auth_controller.dart';
+import 'widgets/edit_profile_sheet.dart';
+import 'widgets/language_sheet.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_row.dart';
 
@@ -15,11 +17,11 @@ const String _kAppVersion = '1.0.0';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  static const _languages = [
-    (SupportedLanguage.uz, "O'zbekcha"),
-    (SupportedLanguage.ru, 'Русский'),
-    (SupportedLanguage.en, 'English'),
-  ];
+  Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
+    final lang = await showLanguageSheet(context, ref);
+    if (lang == null || !context.mounted) return;
+    await _changeLanguage(context, ref, lang);
+  }
 
   Future<void> _changeLanguage(BuildContext context, WidgetRef ref, SupportedLanguage lang) async {
     if (ref.read(localeProvider) == lang) return;
@@ -114,21 +116,28 @@ class ProfileScreen extends ConsumerWidget {
               physics: const BouncingScrollPhysics(),
               children: [
                 ProfileHeader(name: name, phone: user?.phone),
+                if (user != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Center(
+                    child: AppButton(
+                      label: ref.t('profile.editProfile'),
+                      icon: LucideIcons.userPen,
+                      variant: AppButtonVariant.outline,
+                      size: AppButtonSize.md,
+                      expand: false,
+                      onPressed: () => showEditProfileSheet(context, ref),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xxxl),
                 AppSection(
-                  title: ref.t('profile.appLanguage'),
+                  title: ref.t('profile.settingsSection'),
                   padding: EdgeInsets.zero,
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < _languages.length; i++) ...[
-                        if (i > 0) const ProfileRowDivider(),
-                        ProfileRow(
-                          title: _languages[i].$2,
-                          selected: locale == _languages[i].$1,
-                          onTap: () => _changeLanguage(context, ref, _languages[i].$1),
-                        ),
-                      ],
-                    ],
+                  child: ProfileRow(
+                    icon: LucideIcons.languages,
+                    title: ref.t('profile.appLanguage'),
+                    subtitle: languageDisplayName(locale),
+                    onTap: () => _pickLanguage(context, ref),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
