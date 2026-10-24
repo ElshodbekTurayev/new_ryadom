@@ -7,7 +7,6 @@ import '../../../core/providers.dart';
 import 'auth_controller.dart';
 import '../../../ui/ui.dart';
 import 'widgets/brand_mark.dart';
-import 'widgets/intro_scenes.dart';
 
 /// Length of the scripted intro (three scenes, then the logo).
 const Duration kSplashIntroDuration = Duration(milliseconds: 3400);

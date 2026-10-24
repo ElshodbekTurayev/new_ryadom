@@ -21,6 +21,7 @@ export 'components/price_text.dart';
 export 'components/quantity_stepper.dart';
 export 'components/section_header.dart';
 export 'illustrations.dart';
+export 'intro_scenes.dart';
 export 'tokens.dart';
 export 'transitions.dart';
 export 'typography.dart';

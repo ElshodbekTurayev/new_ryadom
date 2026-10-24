@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,7 +97,15 @@ class HomeHeader extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.lg),
 
-          // 2. Large Hero Headline (28-30px, 800 weight, -0.5 letter-spacing)
+          // 2. Time-of-day greeting over the large headline.
+          Row(
+            children: [
+              Icon(_greetingIcon(), size: 16, color: AppColors.accent),
+              const SizedBox(width: 6),
+              Text(ref.t(_greetingKey()), style: AppText.bodySm.copyWith(fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             headline,
             style: AppText.sarlavhaL.copyWith(
@@ -117,64 +127,188 @@ class HomeHeader extends ConsumerWidget {
   }
 }
 
-/// Hero banner — the visual anchor of Home. Brand gradient + the app's own
-/// illustration, so it ships with the build (no third-party photo fetched at
-/// runtime) and no BackdropFilter inside the scroll view.
-class _HomeHeroBanner extends ConsumerWidget {
+String _greetingKey([DateTime? now]) {
+  final h = (now ?? DateTime.now()).hour;
+  if (h >= 5 && h < 12) return 'home.goodMorning';
+  if (h >= 12 && h < 18) return 'home.goodAfternoon';
+  return 'home.goodEvening';
+}
+
+IconData _greetingIcon([DateTime? now]) {
+  final h = (now ?? DateTime.now()).hour;
+  if (h >= 5 && h < 12) return LucideIcons.sunrise;
+  if (h >= 12 && h < 18) return LucideIcons.sun;
+  return LucideIcons.moon;
+}
+
+/// Whether the Home promo carousel advances on its own. Widget tests turn it
+/// off so no periodic timer outlives the test.
+final homePromoAutoplayProvider = Provider<bool>((ref) => true);
+
+class _Promo {
+  const _Promo({required this.scene, required this.icon, required this.key, required this.colors});
+  final IntroScene scene;
+  final IconData icon;
+  final String key; // i18n prefix: <key>Chip / <key>Title / <key>Subtitle
+  final List<Color> colors;
+}
+
+const _promos = [
+  _Promo(
+    scene: IntroScene.delivery,
+    icon: LucideIcons.zap,
+    key: 'home.hero',
+    colors: [Color(0xFF178765), Color(0xFF0F5C45), Color(0xFF0A3E2F)],
+  ),
+  _Promo(
+    scene: IntroScene.bag,
+    icon: LucideIcons.gift,
+    key: 'home.promoFree',
+    colors: [Color(0xFFE0621B), Color(0xFFC2410C), Color(0xFF8A2E0A)],
+  ),
+  _Promo(
+    scene: IntroScene.shop,
+    icon: LucideIcons.store,
+    key: 'home.promoLocal',
+    colors: [Color(0xFF1E6B8F), Color(0xFF15516E), Color(0xFF0D3448)],
+  ),
+];
+
+/// Hero carousel — the visual anchor of Home: three promo cards drawn with
+/// the app's own scene art (ships with the build, no runtime photo fetch),
+/// auto-advancing every few seconds, swipeable, with page dots.
+class _HomeHeroBanner extends ConsumerStatefulWidget {
   const _HomeHeroBanner();
+
+  @override
+  ConsumerState<_HomeHeroBanner> createState() => _HomeHeroBannerState();
+}
+
+class _HomeHeroBannerState extends ConsumerState<_HomeHeroBanner> {
+  static const _interval = Duration(milliseconds: 4500);
+
+  final PageController _page = PageController();
+  Timer? _timer;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(homePromoAutoplayProvider)) _restartTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _page.dispose();
+    super.dispose();
+  }
+
+  /// Restarted after every manual swipe so the user gets a full interval.
+  void _restartTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(_interval, (_) {
+      if (!mounted || !_page.hasClients) return;
+      _page.animateToPage((_index + 1) % _promos.length, duration: AppDurations.page * 2, curve: AppCurves.emphasized);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 168,
+          child: NotificationListener<ScrollStartNotification>(
+            onNotification: (n) {
+              if (n.dragDetails != null && _timer != null) _restartTimer();
+              return false;
+            },
+            child: PageView.builder(
+              controller: _page,
+              itemCount: _promos.length,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (context, i) => AnimatedBuilder(
+                animation: _page,
+                // Parallax: the art drifts slower than the card while swiping.
+                builder: (context, child) {
+                  final page = _page.hasClients && _page.position.haveDimensions ? _page.page ?? 0 : _index.toDouble();
+                  return _PromoCard(promo: _promos[i], parallax: (i - page).clamp(-1.0, 1.0));
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < _promos.length; i++)
+              AnimatedContainer(
+                duration: AppDurations.normal,
+                curve: AppCurves.standard,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == _index ? 20 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: i == _index ? AppColors.brand : AppColors.ink300,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _PromoCard extends ConsumerWidget {
+  const _PromoCard({required this.promo, required this.parallax});
+
+  final _Promo promo;
+
+  /// -1..1: how far this card is from the centre of the carousel.
+  final double parallax;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      width: double.infinity,
-      height: 162,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF178765), Color(0xFF0F5C45), Color(0xFF0A3E2F)],
-        ),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: promo.colors),
         borderRadius: BorderRadius.circular(AppRadius.rCard),
-        boxShadow: const [
-          BoxShadow(color: Color(0x380F5C45), blurRadius: 22, offset: Offset(0, 8)),
-        ],
+        boxShadow: [BoxShadow(color: promo.colors[1].withValues(alpha: 0.28), blurRadius: 22, offset: const Offset(0, 8))],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Soft light bloom top-right
+          // Soft light blooms.
           Positioned(
             right: -30,
             top: -40,
             child: Container(
               width: 190,
               height: 190,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.white.withValues(alpha: 0.08),
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.white.withValues(alpha: 0.08)),
             ),
           ),
-          // Subtle warm bloom bottom-right
           Positioned(
-            right: 40,
-            bottom: -50,
+            left: -40,
+            bottom: -70,
             child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accent.withValues(alpha: 0.12),
-              ),
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.white.withValues(alpha: 0.05)),
             ),
           ),
           Positioned(
-            right: AppSpacing.md,
-            bottom: -6,
-            child: Opacity(opacity: 0.95, child: const Illustration(AppIllustration.success, size: 136)),
+            right: -6 + parallax * 60,
+            top: 0,
+            bottom: 0,
+            child: Center(child: IntroSceneArt(promo.scene, size: 156)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, 140, AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, 150, AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -182,21 +316,18 @@ class _HomeHeroBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.22),
+                    color: AppColors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: Border.all(color: AppColors.white.withValues(alpha: 0.32), width: 0.8),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 1)),
-                    ],
+                    border: Border.all(color: AppColors.white.withValues(alpha: 0.3), width: 0.8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(LucideIcons.zap, size: 12, color: Color(0xFFFFB347)),
+                      Icon(promo.icon, size: 12, color: const Color(0xFFFFD27A)),
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
-                          ref.t('home.heroChip'),
+                          ref.t('${promo.key}Chip'),
                           style: AppText.micro.copyWith(color: AppColors.white, fontWeight: FontWeight.w700),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -207,24 +338,15 @@ class _HomeHeroBanner extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  ref.t('home.heroTitle'),
-                  style: AppText.sarlavhaM.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    height: 1.15,
-                  ),
+                  ref.t('${promo.key}Title'),
+                  style: AppText.sarlavhaM.copyWith(color: AppColors.white, letterSpacing: -0.4, height: 1.15),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  ref.t('home.heroSubtitle'),
-                  style: AppText.caption.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.9),
-                    letterSpacing: -0.1,
-                    height: 1.25,
-                  ),
+                  ref.t('${promo.key}Subtitle'),
+                  style: AppText.caption.copyWith(color: AppColors.white.withValues(alpha: 0.9), height: 1.25),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

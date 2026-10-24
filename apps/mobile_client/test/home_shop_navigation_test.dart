@@ -7,6 +7,7 @@ import 'package:mobile_client/core/providers.dart';
 import 'package:mobile_client/features/shops/domain/shop.dart';
 import 'package:mobile_client/features/shops/presentation/home_controller.dart';
 import 'package:mobile_client/features/shops/presentation/home_screen.dart';
+import 'package:mobile_client/features/shops/presentation/widgets/home_header.dart';
 import 'package:mobile_client/features/shops/presentation/shop_detail_controller.dart';
 import 'package:mobile_client/features/shops/presentation/shop_detail_screen.dart';
 import 'package:mobile_client/features/shops/presentation/widgets/shop_card.dart';
@@ -67,6 +68,7 @@ void main() {
           nearbyShopsProvider.overrideWith((ref) async => shops),
           homeCategoriesProvider.overrideWith((ref) async => const []),
           locationPromptEnabledProvider.overrideWithValue(false),
+          homePromoAutoplayProvider.overrideWithValue(false),
           shopDetailProvider.overrideWith((ref, id) async => shops.firstWhere((s) => s.id == id)),
           shopProductsProvider.overrideWith((ref, id) async => const []),
         ],

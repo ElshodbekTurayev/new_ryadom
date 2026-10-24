@@ -7,6 +7,7 @@ import 'package:mobile_client/core/providers.dart';
 import 'package:mobile_client/features/shops/domain/shop.dart';
 import 'package:mobile_client/features/shops/presentation/home_controller.dart';
 import 'package:mobile_client/features/shops/presentation/home_screen.dart';
+import 'package:mobile_client/features/shops/presentation/widgets/home_header.dart';
 import 'package:mobile_client/features/shops/presentation/widgets/shop_card.dart';
 
 Shop _shop(String name, {double distance = 500, bool open = true}) => Shop(
@@ -47,6 +48,7 @@ void main() {
           nearbyShopsProvider.overrideWith((ref) async => shops),
           homeCategoriesProvider.overrideWith((ref) async => const []),
           locationPromptEnabledProvider.overrideWithValue(false),
+          homePromoAutoplayProvider.overrideWithValue(false),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
