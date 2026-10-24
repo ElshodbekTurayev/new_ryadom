@@ -18,11 +18,7 @@ class OnboardingSlide {
 /// title and subtitle — plus an animated dots indicator. Auto-advance pauses while the user is swiping and restarts
 /// from a full interval afterwards.
 class OnboardingSlides extends StatefulWidget {
-  const OnboardingSlides({
-    super.key,
-    required this.slides,
-    this.interval = const Duration(milliseconds: 3500),
-  });
+  const OnboardingSlides({super.key, required this.slides, this.interval = const Duration(milliseconds: 3500)});
 
   final List<OnboardingSlide> slides;
   final Duration interval;
@@ -121,37 +117,29 @@ class _Slide extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
-                child: AspectRatio(
-                  aspectRatio: 1.05,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: AppColors.brandGradient,
-                      borderRadius: BorderRadius.circular(AppRadius.xxl),
-                      boxShadow: AppShadows.brand,
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Soft light blooms, shifted against the swipe for depth.
-                        Positioned(
-                          top: -60 + offset * 20,
-                          right: -50 - offset * 40,
-                          child: _Bloom(size: 220, opacity: 0.10),
-                        ),
-                        Positioned(
-                          bottom: -70,
-                          left: -60 + offset * 40,
-                          child: _Bloom(size: 200, opacity: 0.06),
-                        ),
-                        Transform.translate(
-                          offset: Offset(offset * 90, 0),
-                          child: Transform.scale(
-                            scale: 1 - offset.abs() * 0.12,
-                            child: FractionallySizedBox(widthFactor: 0.78, child: IntroSceneArt(slide.scene, size: 260)),
+                // Capped so the circle keeps breathing room on phones.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300, maxHeight: 300),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Container(
+                      decoration: BoxDecoration(gradient: AppColors.brandGradient, shape: BoxShape.circle, boxShadow: AppShadows.brand),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Soft light blooms, shifted against the swipe for depth.
+                          Positioned(top: -60 + offset * 20, right: -50 - offset * 40, child: _Bloom(size: 220, opacity: 0.10)),
+                          Positioned(bottom: -70, left: -60 + offset * 40, child: _Bloom(size: 200, opacity: 0.06)),
+                          Transform.translate(
+                            offset: Offset(offset * 90, 0),
+                            child: Transform.scale(
+                              scale: 1 - offset.abs() * 0.12,
+                              child: FractionallySizedBox(widthFactor: 0.72, child: IntroSceneArt(slide.scene, size: 260)),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -192,10 +180,13 @@ class _Bloom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.white.withValues(alpha: opacity)),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.white.withValues(alpha: opacity),
+    ),
+  );
 }
 
 class _Dots extends StatelessWidget {
