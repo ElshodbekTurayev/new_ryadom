@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localshop_shared/localshop_shared.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../favorites/presentation/favorites_controller.dart';
 import '../../orders/presentation/orders_history_controller.dart';
 import 'widgets/edit_profile_sheet.dart';
 import 'widgets/language_sheet.dart';
@@ -106,14 +108,54 @@ class ProfileScreen extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final name = (user?.name ?? '').trim().isEmpty ? ref.t('profile.defaultName') : user!.name!.trim();
 
+    final orders = user == null ? null : ref.watch(myOrdersProvider).valueOrNull;
+    final favoriteCount = ref.watch(favoriteShopsProvider.select((ids) => ids.length));
+
     var sections = <Widget>[
+      if (user != null)
+        AppSection(
+          title: ref.t('profile.mySection'),
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              ProfileRow(
+                icon: LucideIcons.clipboardList,
+                iconColor: AppColors.brand,
+                iconBackground: AppColors.brandSoft,
+                title: ref.t('profile.myOrders'),
+                subtitle: orders == null ? null : ref.t('profile.ordersCount', {'count': '${orders.length}'}),
+                onTap: () => ref.read(mainTabProvider.notifier).state = 1,
+              ),
+              const ProfileRowDivider(indentForIcon: true),
+              ProfileRow(
+                icon: LucideIcons.heart,
+                iconColor: const Color(0xFFE5484D),
+                iconBackground: const Color(0xFFFDECEC),
+                title: ref.t('favorites.title'),
+                subtitle: favoriteCount == 0
+                    ? ref.t('favorites.hint')
+                    : ref.t('favorites.count', {'count': '$favoriteCount'}),
+                onTap: () => context.push('/favorites'),
+              ),
+              const ProfileRowDivider(indentForIcon: true),
+              ProfileRow(
+                icon: LucideIcons.idCard,
+                iconColor: const Color(0xFF7C3AED),
+                iconBackground: const Color(0xFFF1EAFE),
+                title: ref.t('profile.personalData'),
+                subtitle: ref.t('profile.personalDataHint'),
+                onTap: () => showEditProfileSheet(context, ref),
+              ),
+            ],
+          ),
+        ),
       AppSection(
         title: ref.t('profile.settingsSection'),
         padding: EdgeInsets.zero,
         child: ProfileRow(
           icon: LucideIcons.languages,
-          iconColor: AppColors.brand,
-          iconBackground: AppColors.brandSoft,
+          iconColor: const Color(0xFF0E7490),
+          iconBackground: const Color(0xFFE0F2F7),
           title: ref.t('profile.appLanguage'),
           subtitle: languageDisplayName(locale),
           onTap: () => _pickLanguage(context, ref),

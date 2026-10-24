@@ -8,6 +8,7 @@ import '../features/auth/presentation/phone_screen.dart';
 import '../features/auth/presentation/splash_screen.dart';
 import '../features/auth/presentation/welcome_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
+import '../features/favorites/presentation/favorites_screen.dart';
 import '../features/orders/presentation/checkout_screen.dart';
 import '../features/orders/presentation/order_tracking_screen.dart';
 import '../features/shops/presentation/shop_detail_screen.dart';
@@ -70,6 +71,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             slidePage(key: state.pageKey, child: ShopDetailScreen(shopId: state.pathParameters['id']!)),
       ),
       GoRoute(path: '/cart', pageBuilder: (context, state) => slidePage(key: state.pageKey, child: const CartScreen())),
+      GoRoute(path: '/favorites', pageBuilder: (context, state) => slidePage(key: state.pageKey, child: const FavoritesScreen())),
       GoRoute(path: '/checkout', pageBuilder: (context, state) => slidePage(key: state.pageKey, child: const CheckoutScreen())),
       GoRoute(
         path: '/order/:id',

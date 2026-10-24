@@ -19,8 +19,6 @@ class MainShellScreen extends ConsumerStatefulWidget {
 }
 
 class _MainShellScreenState extends ConsumerState<MainShellScreen> {
-  int _index = 0;
-
   // IndexedStack keeps every tab's scroll position and state alive.
   static const _screens = [
     HomeScreen(),
@@ -31,13 +29,14 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final index = ref.watch(mainTabProvider);
     final cartCount = ref.watch(cartControllerProvider.select((c) => c.itemCount));
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: _screens),
+      body: IndexedStack(index: index, children: _screens),
       bottomNavigationBar: _BottomBar(
-        index: _index,
-        onChanged: (i) => setState(() => _index = i),
+        index: index,
+        onChanged: (i) => ref.read(mainTabProvider.notifier).state = i,
         items: [
           _TabItem(icon: LucideIcons.home, label: ref.t('tabs.home')),
           _TabItem(icon: LucideIcons.clipboardList, label: ref.t('tabs.orders')),

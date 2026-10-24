@@ -15,7 +15,6 @@ import '../domain/shop.dart';
 import 'home_controller.dart';
 import 'widgets/category_row.dart';
 import 'widgets/home_header.dart';
-import 'widgets/recent_order_card.dart';
 import 'widgets/shop_card.dart';
 import 'widgets/shops_map_view.dart';
 
@@ -241,9 +240,6 @@ class _ShopListState extends ConsumerState<_ShopList> {
                 },
               ),
             ),
-          ),
-          const SliverToBoxAdapter(
-            child: RecentOrderCard(),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
         ],

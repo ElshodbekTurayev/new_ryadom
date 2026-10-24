@@ -6,6 +6,7 @@ import 'package:localshop_shared/localshop_shared.dart';
 
 import '../../../../core/providers.dart';
 import '../../../../ui/ui.dart';
+import '../../../favorites/presentation/favorite_button.dart';
 import '../../domain/eta.dart';
 import '../../domain/shop.dart';
 
@@ -66,6 +67,11 @@ class ShopCard extends ConsumerWidget {
                       ),
                     ),
                   ),
+                ),
+                Positioned(
+                  top: AppSpacing.md,
+                  right: AppSpacing.md,
+                  child: FavoriteButton(shopId: shop.id, size: 36),
                 ),
                 Positioned(
                   top: AppSpacing.md,

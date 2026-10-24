@@ -98,3 +98,7 @@ extension TranslateWidgetRef on WidgetRef {
     return i18n.t(lang, fallbackKey);
   }
 }
+
+/// Selected bottom tab (0 home, 1 orders, 2 cart, 3 profile). A provider so
+/// other screens (e.g. Profile → "Buyurtmalarim") can switch tabs.
+final mainTabProvider = StateProvider.autoDispose<int>((ref) => 0);

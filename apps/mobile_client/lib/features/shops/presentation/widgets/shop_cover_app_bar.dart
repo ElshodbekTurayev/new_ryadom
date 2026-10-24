@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 
 import '../../../../core/utils/launch_url.dart';
 import '../../../../ui/ui.dart';
+import '../../../favorites/presentation/favorite_button.dart';
 import '../../domain/shop.dart';
 import 'shop_card.dart' show ShopCover;
 
@@ -48,6 +49,8 @@ class ShopCoverAppBar extends StatelessWidget {
         ),
       ),
       actions: [
+        Center(child: FavoriteButton(shopId: shop.id)),
+        SizedBox(width: shop.phone.isNotEmpty ? AppSpacing.sm : AppSpacing.page),
         if (shop.phone.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.page),

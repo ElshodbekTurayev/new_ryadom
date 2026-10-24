@@ -236,7 +236,12 @@
     "settingsSection": "Sozlamalar",
     "statOrders": "Buyurtmalar",
     "statDelivered": "Yetkazilgan",
-    "statSpent": "Jami xarid"
+    "statSpent": "Jami xarid",
+    "mySection": "Mening",
+    "myOrders": "Buyurtmalarim",
+    "ordersCount": "{{count}} ta buyurtma",
+    "personalData": "Shaxsiy ma'lumotlar",
+    "personalDataHint": "Ism va telefon raqam"
   },
   "tabs": {
     "home": "Asosiy",
@@ -277,5 +282,18 @@
     "scene1": "Mahallangizdagi do'konlar",
     "scene2": "Kerakli mahsulotlar — bir joyda",
     "scene3": "Eshigingizgacha tez yetkazamiz"
+  },
+  "favorites": {
+    "title": "Sevimlilarim",
+    "hint": "Do'konlarni ♥ bosib saqlang",
+    "count": "{{count}} ta do'kon",
+    "add": "Sevimlilarga qo'shish",
+    "remove": "Sevimlilardan olib tashlash",
+    "added": "Sevimlilarga qo'shildi",
+    "removed": "Sevimlilardan olib tashlandi",
+    "emptyTitle": "Hali sevimli do'kon yo'q",
+    "emptySubtitle": "Do'kon kartasidagi ♥ belgisini bosing — u shu yerda saqlanadi",
+    "browse": "Do'konlarni ko'rish",
+    "unavailable": "Do'kon hozircha mavjud emas"
   }
 }

@@ -236,7 +236,12 @@
     "settingsSection": "Settings",
     "statOrders": "Orders",
     "statDelivered": "Delivered",
-    "statSpent": "Total spent"
+    "statSpent": "Total spent",
+    "mySection": "My account",
+    "myOrders": "My orders",
+    "ordersCount": "{{count}} orders",
+    "personalData": "Personal data",
+    "personalDataHint": "Name and phone number"
   },
   "tabs": {
     "home": "Home",
@@ -277,5 +282,18 @@
     "scene1": "Shops in your neighbourhood",
     "scene2": "Everything you need in one place",
     "scene3": "Fast delivery to your door"
+  },
+  "favorites": {
+    "title": "Favourites",
+    "hint": "Tap ♥ on a shop to save it",
+    "count": "{{count}} shops",
+    "add": "Add to favourites",
+    "remove": "Remove from favourites",
+    "added": "Added to favourites",
+    "removed": "Removed from favourites",
+    "emptyTitle": "No favourite shops yet",
+    "emptySubtitle": "Tap ♥ on a shop card and it will be saved here",
+    "browse": "Browse shops",
+    "unavailable": "This shop is unavailable right now"
   }
 }
