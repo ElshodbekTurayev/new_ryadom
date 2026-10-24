@@ -224,7 +224,10 @@
     "phoneLabel": "Telefon raqam",
     "phoneLocked": "Telefon raqam hisobingizga bog'langan, uni o'zgartirib bo'lmaydi",
     "saved": "Profil saqlandi",
-    "settingsSection": "Sozlamalar"
+    "settingsSection": "Sozlamalar",
+    "statOrders": "Buyurtmalar",
+    "statDelivered": "Yetkazilgan",
+    "statSpent": "Jami xarid"
   },
   "tabs": {
     "home": "Asosiy",

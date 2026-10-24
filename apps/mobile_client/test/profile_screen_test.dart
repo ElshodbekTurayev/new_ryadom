@@ -6,6 +6,9 @@ import 'package:mobile_client/core/i18n/i18n_service.dart';
 import 'package:mobile_client/core/providers.dart';
 import 'package:mobile_client/features/auth/domain/app_user.dart';
 import 'package:mobile_client/features/auth/presentation/auth_controller.dart';
+import 'package:mobile_client/features/orders/domain/order.dart';
+import 'package:mobile_client/features/orders/presentation/orders_history_controller.dart';
+import 'package:mobile_client/ui/ui.dart' show LucideIcons;
 import 'package:mobile_client/features/profile/presentation/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +28,18 @@ class _FakeAuth extends AuthController {
   @override
   Future<void> changeLanguage(String languageCode) async {}
 }
+
+Order _order(OrderStatus status, int totalTiyin) => Order(
+      id: 'o-${status.value}',
+      status: status,
+      paymentMethod: PaymentMethod.cash,
+      totalAmount: totalTiyin,
+      addressText: 'Test',
+      customerPhone: '+998901234567',
+      createdAt: DateTime(2026, 10, 1),
+      items: const [],
+      statusHistory: const [],
+    );
 
 void main() {
   late I18nService i18n;
@@ -46,12 +61,24 @@ void main() {
         overrides: [
           i18nServiceProvider.overrideWithValue(i18n),
           authControllerProvider.overrideWith(_FakeAuth.new),
+          myOrdersProvider.overrideWith((ref) async => [_order(OrderStatus.delivered, 4500000), _order(OrderStatus.newOrder, 1200000)]),
         ],
         child: const MaterialApp(home: ProfileScreen()),
       ),
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('header shows order stats from the history', (tester) async {
+    await pump(tester);
+
+    expect(find.text('Buyurtmalar'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget); // all orders
+    expect(find.text('1'), findsOneWidget); // delivered only
+    // Spent counts only the delivered 45 000 so'm, not the new 12 000 so'm.
+    expect(find.textContaining(RegExp(r'^45\D000')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^57\D000')), findsNothing);
+  });
 
   testWidgets('language lives behind one row that opens all three languages', (tester) async {
     await pump(tester);
@@ -79,8 +106,9 @@ void main() {
     await pump(tester);
     expect(find.text('Sardor'), findsOneWidget);
 
-    await tester.tap(find.text('Profilni tahrirlash'));
+    await tester.tap(find.byIcon(LucideIcons.pencil));
     await tester.pumpAndSettle();
+    expect(find.text('Profilni tahrirlash'), findsOneWidget);
 
     expect(find.text('+998 90 123 45 67'), findsWidgets);
     final phoneField = tester.widget<TextField>(find.widgetWithText(TextField, '+998 90 123 45 67'));

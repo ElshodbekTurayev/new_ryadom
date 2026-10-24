@@ -6,6 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/providers.dart';
 import '../../../ui/ui.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../orders/presentation/orders_history_controller.dart';
 import 'widgets/edit_profile_sheet.dart';
 import 'widgets/language_sheet.dart';
 import 'widgets/profile_header.dart';
@@ -105,6 +106,64 @@ class ProfileScreen extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final name = (user?.name ?? '').trim().isEmpty ? ref.t('profile.defaultName') : user!.name!.trim();
 
+    var sections = <Widget>[
+      AppSection(
+        title: ref.t('profile.settingsSection'),
+        padding: EdgeInsets.zero,
+        child: ProfileRow(
+          icon: LucideIcons.languages,
+          iconColor: AppColors.brand,
+          iconBackground: AppColors.brandSoft,
+          title: ref.t('profile.appLanguage'),
+          subtitle: languageDisplayName(locale),
+          onTap: () => _pickLanguage(context, ref),
+        ),
+      ),
+      AppSection(
+        title: ref.t('profile.helpSection'),
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            ProfileRow(
+              icon: LucideIcons.lifeBuoy,
+              iconColor: AppColors.accent,
+              iconBackground: AppColors.accentLight,
+              title: ref.t('profile.support'),
+              onTap: () => _showSupport(context, ref),
+            ),
+            const ProfileRowDivider(indentForIcon: true),
+            ProfileRow(
+              icon: LucideIcons.info,
+              iconColor: AppColors.info,
+              iconBackground: AppColors.infoSoft,
+              title: ref.t('profile.about'),
+              subtitle: ref.t('profile.version', {'version': _kAppVersion}),
+              onTap: () => _showAbout(context, ref),
+            ),
+          ],
+        ),
+      ),
+      AppCard(
+        padding: EdgeInsets.zero,
+        child: ProfileRow(
+          icon: LucideIcons.logOut,
+          iconColor: AppColors.danger,
+          iconBackground: AppColors.dangerSoft,
+          title: ref.t('profile.logoutButton'),
+          trailing: const SizedBox.shrink(),
+          onTap: () => _logout(context, ref),
+        ),
+      ),
+    ];
+    // Gentle staggered entrance under the header.
+    sections = [
+      for (var i = 0; i < sections.length; i++)
+        sections[i]
+            .animate(delay: (80 + i * 50).ms)
+            .fadeIn(duration: AppDurations.slow)
+            .moveY(begin: 10, end: 0, curve: AppCurves.standard),
+    ];
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -112,61 +171,30 @@ class ProfileScreen extends ConsumerWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _kMaxContentWidth),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxxl, AppSpacing.page, AppSpacing.xxxl),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xl, AppSpacing.page, AppSpacing.xxxl),
               physics: const BouncingScrollPhysics(),
               children: [
-                ProfileHeader(name: name, phone: user?.phone),
-                if (user != null) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  Center(
-                    child: AppButton(
-                      label: ref.t('profile.editProfile'),
-                      icon: LucideIcons.userPen,
-                      variant: AppButtonVariant.outline,
-                      size: AppButtonSize.md,
-                      expand: false,
-                      onPressed: () => showEditProfileSheet(context, ref),
-                    ),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.lg),
+                  child: Text(ref.t('profile.title'), style: AppText.h1),
+                ),
+                ProfileHeader(
+                  name: name,
+                  phone: user?.phone,
+                  onEdit: user == null ? null : () => showEditProfileSheet(context, ref),
+                  editTooltip: ref.t('profile.editProfile'),
+                  stats: user == null ? null : const _OrderStats(),
+                ),
+                for (final section in sections) ...[
+                  const SizedBox(height: AppSpacing.xxl),
+                  section,
                 ],
-                const SizedBox(height: AppSpacing.xxxl),
-                AppSection(
-                  title: ref.t('profile.settingsSection'),
-                  padding: EdgeInsets.zero,
-                  child: ProfileRow(
-                    icon: LucideIcons.languages,
-                    title: ref.t('profile.appLanguage'),
-                    subtitle: languageDisplayName(locale),
-                    onTap: () => _pickLanguage(context, ref),
-                  ),
-                ),
                 const SizedBox(height: AppSpacing.xxl),
-                AppSection(
-                  title: ref.t('profile.helpSection'),
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    children: [
-                      ProfileRow(
-                        icon: LucideIcons.lifeBuoy,
-                        title: ref.t('profile.support'),
-                        onTap: () => _showSupport(context, ref),
-                      ),
-                      const ProfileRowDivider(indentForIcon: true),
-                      ProfileRow(
-                        icon: LucideIcons.info,
-                        title: ref.t('profile.about'),
-                        subtitle: ref.t('profile.version', {'version': _kAppVersion}),
-                        onTap: () => _showAbout(context, ref),
-                      ),
-                    ],
+                Center(
+                  child: Text(
+                    '${ref.t('common.appName')} · ${ref.t('profile.version', {'version': _kAppVersion})}',
+                    style: AppText.caption.copyWith(color: AppColors.textTertiary),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                AppButton(
-                  label: ref.t('profile.logoutButton'),
-                  icon: LucideIcons.logOut,
-                  variant: AppButtonVariant.danger,
-                  onPressed: () => _logout(context, ref),
                 ),
               ],
             ),
@@ -175,4 +203,36 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Orders placed, orders delivered and money spent on delivered orders.
+/// Shows dashes while loading or when the history cannot be fetched.
+class _OrderStats extends ConsumerWidget {
+  const _OrderStats();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(myOrdersProvider).valueOrNull;
+    final lang = ref.watch(localeProvider);
+    final delivered = orders?.where((o) => o.status == OrderStatus.delivered).toList();
+    final spent = delivered?.fold<int>(0, (sum, o) => sum + o.totalAmount);
+
+    return Row(
+      children: [
+        Expanded(child: ProfileStat(label: ref.t('profile.statOrders'), value: orders?.length.toString())),
+        const _StatDivider(),
+        Expanded(child: ProfileStat(label: ref.t('profile.statDelivered'), value: delivered?.length.toString())),
+        const _StatDivider(),
+        Expanded(child: ProfileStat(label: ref.t('profile.statSpent'), value: spent == null ? null : formatPrice(spent, lang))),
+      ],
+    );
+  }
+}
+
+class _StatDivider extends StatelessWidget {
+  const _StatDivider();
+
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 32, color: AppColors.white.withValues(alpha: 0.16));
 }

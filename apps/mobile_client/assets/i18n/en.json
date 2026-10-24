@@ -224,7 +224,10 @@
     "phoneLabel": "Phone number",
     "phoneLocked": "Your phone number is tied to your account and cannot be changed",
     "saved": "Profile saved",
-    "settingsSection": "Settings"
+    "settingsSection": "Settings",
+    "statOrders": "Orders",
+    "statDelivered": "Delivered",
+    "statSpent": "Total spent"
   },
   "tabs": {
     "home": "Home",

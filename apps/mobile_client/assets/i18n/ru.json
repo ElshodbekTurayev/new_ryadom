@@ -224,7 +224,10 @@
     "phoneLabel": "Номер телефона",
     "phoneLocked": "Номер привязан к аккаунту и не может быть изменён",
     "saved": "Профиль сохранён",
-    "settingsSection": "Настройки"
+    "settingsSection": "Настройки",
+    "statOrders": "Заказы",
+    "statDelivered": "Доставлено",
+    "statSpent": "Всего покупок"
   },
   "tabs": {
     "home": "Главная",

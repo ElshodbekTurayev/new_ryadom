@@ -13,11 +13,15 @@ class ProfileRow extends StatelessWidget {
     this.onTap,
     this.selected = false,
     this.trailing,
+    this.iconColor = AppColors.ink700,
+    this.iconBackground = AppColors.ink50,
   });
 
   final String title;
   final String? subtitle;
   final IconData? icon;
+  final Color iconColor;
+  final Color iconBackground;
   final VoidCallback? onTap;
   final bool selected;
   final Widget? trailing;
@@ -46,9 +50,9 @@ class ProfileRow extends StatelessWidget {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(color: AppColors.ink50, borderRadius: BorderRadius.circular(AppRadius.sm)),
+                  decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(AppRadius.sm)),
                   alignment: Alignment.center,
-                  child: Icon(icon, size: 18, color: AppColors.ink700),
+                  child: Icon(icon, size: 18, color: iconColor),
                 ),
                 const SizedBox(width: AppSpacing.md),
               ],
