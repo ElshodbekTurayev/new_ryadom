@@ -276,7 +276,10 @@
     "ORDER_NOT_DELIVERED": "The order has not been delivered yet.",
     "ORDER_NOT_FOUND": "Order not found.",
     "DUPLICATE_REQUEST": "This request is already being processed.",
-    "INTERNAL_SERVER_ERROR": "Server error. Please try again shortly."
+    "INTERNAL_SERVER_ERROR": "Server error. Please try again shortly.",
+    "tooManyShort": "Too many requests.",
+    "waitMinutes": "Try again in {{min}} min.",
+    "waitSeconds": "Try again in {{sec}} s."
   },
   "splash": {
     "scene1": "Shops in your neighbourhood",

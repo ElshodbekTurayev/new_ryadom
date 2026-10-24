@@ -276,7 +276,10 @@
     "ORDER_NOT_DELIVERED": "Заказ ещё не доставлен.",
     "ORDER_NOT_FOUND": "Заказ не найден.",
     "DUPLICATE_REQUEST": "Запрос уже обрабатывается.",
-    "INTERNAL_SERVER_ERROR": "Ошибка сервера. Попробуйте чуть позже."
+    "INTERNAL_SERVER_ERROR": "Ошибка сервера. Попробуйте чуть позже.",
+    "tooManyShort": "Слишком много запросов.",
+    "waitMinutes": "Повторите через {{min}} мин.",
+    "waitSeconds": "Повторите через {{sec}} сек."
   },
   "splash": {
     "scene1": "Магазины вашего района",

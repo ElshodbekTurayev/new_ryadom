@@ -32,6 +32,24 @@ void main() {
       expect(e.code, 'OUT_OF_STOCK');
     });
 
+    test('reads Retry-After on rate limits', () {
+      final options = RequestOptions(path: '/auth/send-code');
+      final e = AppException.fromDioException(DioException(
+        requestOptions: options,
+        type: DioExceptionType.badResponse,
+        response: Response(
+          requestOptions: options,
+          statusCode: 429,
+          data: {'code': 'TOO_MANY_REQUESTS', 'message': 'ThrottlerException'},
+          headers: Headers.fromMap({
+            'retry-after': ['499'],
+          }),
+        ),
+      ));
+      expect(e.code, 'TOO_MANY_REQUESTS');
+      expect(e.retryAfter, const Duration(seconds: 499));
+    });
+
     test('marks 401 as unauthorized', () {
       final e = AppException.fromDioException(_response(401, {'code': 'UNAUTHORIZED', 'message': 'no'}));
       expect(e.isUnauthorized, isTrue);

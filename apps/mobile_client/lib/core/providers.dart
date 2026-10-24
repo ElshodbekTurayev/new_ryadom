@@ -93,7 +93,15 @@ extension TranslateWidgetRef on WidgetRef {
     if (code != null) {
       final key = 'errors.$code';
       final text = i18n.t(lang, key);
-      if (text != key) return text;
+      if (text != key) {
+        // Rate limits: say how long to wait instead of a vague "later".
+        final wait = error is AppException ? error.retryAfter : null;
+        if (wait == null) return text;
+        final waitText = wait.inSeconds < 60
+            ? i18n.t(lang, 'errors.waitSeconds', {'sec': '${wait.inSeconds}'})
+            : i18n.t(lang, 'errors.waitMinutes', {'min': '${(wait.inSeconds / 60).ceil()}'});
+        return '${i18n.t(lang, 'errors.tooManyShort')} $waitText';
+      }
     }
     return i18n.t(lang, fallbackKey);
   }

@@ -7,13 +7,16 @@ import 'package:dio/dio.dart';
 /// `{ statusCode, code, message, timestamp, details? }` body; an older nested
 /// `{ error: { code, message } }` shape is still accepted.
 class AppException implements Exception {
-  AppException(this.message, {this.code, this.statusCode});
+  AppException(this.message, {this.code, this.statusCode, this.retryAfter});
 
   /// Developer-facing message (the backend's, usually English). Screens show
   /// a localized text picked by [code] instead — see `WidgetRef.errorText`.
   final String message;
   final String? code;
   final int? statusCode;
+
+  /// From the `Retry-After` header on 429s: how long until the limit resets.
+  final Duration? retryAfter;
 
   static const networkError = 'NETWORK_ERROR';
   static const timeout = 'TIMEOUT';
@@ -28,6 +31,8 @@ class AppException implements Exception {
   factory AppException.fromDioException(DioException e) {
     final status = e.response?.statusCode;
     final data = e.response?.data;
+    final retrySeconds = int.tryParse(e.response?.headers.value('retry-after') ?? '');
+    final retryAfter = retrySeconds == null || retrySeconds <= 0 ? null : Duration(seconds: retrySeconds);
     if (data is Map) {
       final nested = data['error'];
       final source = nested is Map ? nested : data;
@@ -39,6 +44,7 @@ class AppException implements Exception {
           (text == null || text.isEmpty) ? 'Request failed' : text,
           code: code,
           statusCode: status,
+          retryAfter: retryAfter,
         );
       }
     }

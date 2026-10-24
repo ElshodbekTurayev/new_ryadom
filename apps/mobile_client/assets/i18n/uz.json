@@ -276,7 +276,10 @@
     "ORDER_NOT_DELIVERED": "Buyurtma hali yetkazilmagan.",
     "ORDER_NOT_FOUND": "Buyurtma topilmadi.",
     "DUPLICATE_REQUEST": "So'rov allaqachon qayta ishlanmoqda.",
-    "INTERNAL_SERVER_ERROR": "Serverda xatolik. Birozdan so'ng urinib ko'ring."
+    "INTERNAL_SERVER_ERROR": "Serverda xatolik. Birozdan so'ng urinib ko'ring.",
+    "tooManyShort": "So'rovlar juda ko'p.",
+    "waitMinutes": "{{min}} daqiqadan so'ng qayta urinib ko'ring.",
+    "waitSeconds": "{{sec}} soniyadan so'ng qayta urinib ko'ring."
   },
   "splash": {
     "scene1": "Mahallangizdagi do'konlar",
