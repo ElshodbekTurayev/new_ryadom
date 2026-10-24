@@ -6,16 +6,16 @@ import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../../../ui/ui.dart';
 
 class OnboardingSlide {
-  const OnboardingSlide({required this.scene, required this.title, required this.subtitle});
+  const OnboardingSlide({required this.illustration, required this.title, required this.subtitle});
 
-  final IntroScene scene;
+  final AppIllustration illustration;
   final String title;
   final String subtitle;
 }
 
-/// Auto-advancing PageView of slides — each the app's scene art on a
-/// brand-green card (same art as the launch intro and Home promos) with a
-/// title and subtitle — plus an animated dots indicator. Auto-advance pauses while the user is swiping and restarts
+/// Auto-advancing PageView of slides — a spot illustration on a soft circle
+/// with a title and subtitle — plus an animated dots indicator. (The scene
+/// art is reserved for the launch intro so new users do not see it twice.) Auto-advance pauses while the user is swiping and restarts
 /// from a full interval afterwards.
 class OnboardingSlides extends StatefulWidget {
   const OnboardingSlides({super.key, required this.slides, this.interval = const Duration(milliseconds: 3500)});
@@ -123,19 +123,32 @@ class _Slide extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: Container(
-                      decoration: BoxDecoration(gradient: AppColors.brandGradient, shape: BoxShape.circle, boxShadow: AppShadows.brand),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: AppShadows.premium,
+                      ),
                       clipBehavior: Clip.antiAlias,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           // Soft light blooms, shifted against the swipe for depth.
-                          Positioned(top: -60 + offset * 20, right: -50 - offset * 40, child: _Bloom(size: 220, opacity: 0.10)),
-                          Positioned(bottom: -70, left: -60 + offset * 40, child: _Bloom(size: 200, opacity: 0.06)),
+                          Positioned(
+                            top: -60 + offset * 20,
+                            right: -50 - offset * 40,
+                            child: _Bloom(size: 200, color: AppColors.brandSoft),
+                          ),
+                          Positioned(
+                            bottom: -70,
+                            left: -60 + offset * 40,
+                            child: _Bloom(size: 180, color: AppColors.accentLight),
+                          ),
                           Transform.translate(
                             offset: Offset(offset * 90, 0),
                             child: Transform.scale(
                               scale: 1 - offset.abs() * 0.12,
-                              child: FractionallySizedBox(widthFactor: 0.72, child: IntroSceneArt(slide.scene, size: 260)),
+                              child: FractionallySizedBox(widthFactor: 0.78, child: Illustration(slide.illustration, size: 260)),
                             ),
                           ),
                         ],
@@ -173,19 +186,16 @@ class _Slide extends StatelessWidget {
 }
 
 class _Bloom extends StatelessWidget {
-  const _Bloom({required this.size, required this.opacity});
+  const _Bloom({required this.size, required this.color});
 
   final double size;
-  final double opacity;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Container(
     width: size,
     height: size,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.white.withValues(alpha: opacity),
-    ),
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.7)),
   );
 }
 

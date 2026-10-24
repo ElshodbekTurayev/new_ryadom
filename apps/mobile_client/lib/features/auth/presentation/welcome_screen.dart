@@ -16,9 +16,9 @@ class WelcomeScreen extends ConsumerWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     final slides = [
-      OnboardingSlide(scene: IntroScene.shop, title: ref.t('welcome.slide1Title'), subtitle: ref.t('welcome.slide1Subtitle')),
-      OnboardingSlide(scene: IntroScene.bag, title: ref.t('welcome.slide2Title'), subtitle: ref.t('welcome.slide2Subtitle')),
-      OnboardingSlide(scene: IntroScene.delivery, title: ref.t('welcome.slide3Title'), subtitle: ref.t('welcome.slide3Subtitle')),
+      OnboardingSlide(illustration: AppIllustration.location, title: ref.t('welcome.slide1Title'), subtitle: ref.t('welcome.slide1Subtitle')),
+      OnboardingSlide(illustration: AppIllustration.noShops, title: ref.t('welcome.slide2Title'), subtitle: ref.t('welcome.slide2Subtitle')),
+      OnboardingSlide(illustration: AppIllustration.success, title: ref.t('welcome.slide3Title'), subtitle: ref.t('welcome.slide3Subtitle')),
     ];
 
     return Scaffold(
