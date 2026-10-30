@@ -1,6 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Only debug/profile manifests add INTERNET; release builds need it here. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Delivery address from GPS (geolocator). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- usesCleartextTraffic: lets a test APK reach a plain-http API on the LAN
+         (http://192.168.x.x:4000). Remove once the API is served over HTTPS. -->
     <application
-        android:label="mobile_client"
+        android:label="Ryadom"
+        android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
